@@ -35,30 +35,36 @@ in production" below) — with that swap, the whole app fits comfortably.
    - `JIRA_API_TOKEN`
    - `JIRA_PROJECT_KEY`
    (same values as your local `.env` — never commit these)
-5. Click **Create Web Service**. First deploy takes a few minutes: it builds the
-   Docker image, downloads the embedding + reranker models, and rebuilds the
-   Chroma index from `data/chunks/` — see `docker-entrypoint.sh`.
+5. Click **Create Web Service**. The Docker build step takes a few minutes: it
+   downloads the embedding + reranker models AND builds the Chroma index from
+   `data/chunks/` — both baked into the image at build time (see the
+   Dockerfile), not at container boot. Boot itself is fast (just reseeds
+   `sessions.db` and starts the server — see `docker-entrypoint.sh`).
 
 **Free tier note:** Render's free web services spin down after 15 minutes of no
 traffic and take ~30-60s to wake on the next request (cold start). Fine for a
 demo link, not for guaranteed instant response at all times.
 
-### Why the disk resets every time
+### Why the Chroma index and models are baked into the image, not rebuilt at boot
 
 Render's free tier disk is **ephemeral** — every redeploy/restart starts from a
-blank filesystem. `docker-entrypoint.sh` handles that by rebuilding the Chroma
-index and reseeding staff accounts (`alice`/`bob`/`carol`/`dave`/`admin`) on
-every boot, from the small source files already in `data/` (a few MB, committed
-to git) — not from the local `chroma_db/`/`sessions.db` files, which are
-gitignored and never shipped.
+blank filesystem, so a boot-time rebuild sounded right at first. In practice,
+embedding all 299 KB chunks took 20+ minutes on Render's free-tier 0.1 vCPU — far
+past the ~5 minute window Render allows before killing an unresponsive boot
+(confirmed by a real failed deploy, not a guess). A Docker **build** step has no
+such timeout, so the Dockerfile now runs `embed_and_store.py` (and downloads both
+ML models) once per `git push`, baked into the image — boot itself only reseeds
+`sessions.db` (`alice`/`bob`/`carol`/`dave`/`admin`), which is instant.
 
-**What this means in practice:** every container restart gives every visitor
-(including you) a genuinely fresh demo — no leftover sessions, no stale custom
-eval cases from a prior boot. The golden set version history
-(`golden_set_v1.jsonl`, `golden_set_v2.jsonl`, `golden_set_meta.json`) and
-`eval_custom_cases.jsonl` in `data/processed/` ARE committed to git, so that
-specific demonstration history survives across redeploys even though the
-runtime DB/vector-index don't.
+**What this means in practice:** a KB content change (editing `data/chunks/*.jsonl`)
+needs a new push to take effect, not just a restart — already true for a
+git-based deploy anyway. Chat sessions and custom eval cases still reset on every
+container restart (that part of the ephemeral-disk behavior is unchanged — see
+`sessions.db` above), so every visitor still gets a fresh demo regardless of
+persona. The golden set version history (`golden_set_v1.jsonl`,
+`golden_set_v2.jsonl`, `golden_set_meta.json`) and `eval_custom_cases.jsonl` in
+`data/processed/` are committed to git, so that specific demonstration history
+survives across redeploys too.
 
 ### Why the reranker is different in production
 

@@ -16,7 +16,7 @@ import json
 from fastembed import TextEmbedding
 import chromadb
 
-from config import CHROMA_DB_PATH, MODEL_CACHE_DIR, DATA_DIR
+from config import CHROMA_DB_PATH, MODEL_CACHE_DIR, DATA_DIR, ONNX_NUM_THREADS
 
 DATA_CHUNKS = DATA_DIR / "chunks"
 
@@ -33,7 +33,7 @@ DATA_CHUNKS = DATA_DIR / "chunks"
 # wiped between sessions on the user's Windows machine -- see
 # PROJECT_HANDOFF.md Section 6, bug #4.
 MODEL_NAME = "BAAI/bge-small-en-v1.5"
-model = TextEmbedding(model_name=MODEL_NAME, cache_dir=str(MODEL_CACHE_DIR))
+model = TextEmbedding(model_name=MODEL_NAME, cache_dir=str(MODEL_CACHE_DIR), threads=ONNX_NUM_THREADS)
 
 # IMPORTANT, model-specific detail: BGE models expect an instruction prefix
 # on QUERIES at search time ("Represent this sentence for searching

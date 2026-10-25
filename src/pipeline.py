@@ -48,7 +48,7 @@ from step7_recency import apply_recency_rerank  # noqa: E402
 from step8_confidence import check_confidence, log_knowledge_gap  # noqa: E402
 from retrieval_pipeline import access_denial_info, hybrid_search_reranked  # noqa: E402
 from live_events import StageTimer  # noqa: E402
-from config import CHROMA_DB_PATH, MODEL_CACHE_DIR, REPO_ROOT, RERANKER_MODEL_NAME  # noqa: E402
+from config import CHROMA_DB_PATH, MODEL_CACHE_DIR, REPO_ROOT, RERANKER_MODEL_NAME, ONNX_NUM_THREADS  # noqa: E402
 
 load_dotenv(REPO_ROOT / ".env")
 
@@ -67,10 +67,10 @@ class PipelineClients:
     def build(cls) -> "PipelineClients":
         gemini = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
         embedding_model = TextEmbedding(
-            model_name="BAAI/bge-small-en-v1.5", cache_dir=str(MODEL_CACHE_DIR)
+            model_name="BAAI/bge-small-en-v1.5", cache_dir=str(MODEL_CACHE_DIR), threads=ONNX_NUM_THREADS
         )
         reranker = TextCrossEncoder(
-            model_name=RERANKER_MODEL_NAME, cache_dir=str(MODEL_CACHE_DIR)
+            model_name=RERANKER_MODEL_NAME, cache_dir=str(MODEL_CACHE_DIR), threads=ONNX_NUM_THREADS
         )
         client = chromadb.PersistentClient(path=str(CHROMA_DB_PATH))
         collection = client.get_collection("it_helpdesk_kb")

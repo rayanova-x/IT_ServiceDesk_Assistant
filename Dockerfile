@@ -29,6 +29,18 @@ ENV PYTHONUNBUFFERED=1
 # this one).
 ENV RERANKER_MODEL="Xenova/ms-marco-MiniLM-L-6-v2"
 
+# Caps onnxruntime's thread pool at 1 -- the actual root cause of a real
+# stuck deploy (2026-10-25): left unset, onnxruntime sizes its thread
+# pool from os.cpu_count(), which reports the HOST machine's cores, not
+# the container's cgroup CPU quota (Render free tier: 0.1 vCPU). The
+# oversized thread pool doesn't just run slow, it HANGS -- threads
+# spin-wait against a quota that never gives them real CPU time. A real
+# deploy confirmed this: embed_and_store.py sat completely silent for
+# 30+ seconds inside model.embed() with PYTHONUNBUFFERED=1 already set
+# (ruling out a buffering explanation) before Render's port-scan timeout
+# fired. See config.py's ONNX_NUM_THREADS docstring.
+ENV ONNX_NUM_THREADS=1
+
 # Pre-download both ML models into the image at BUILD time (once per git
 # push), not at container BOOT time (every restart, including Render
 # free tier's spin-down/wake-up cycle). Previously both models downloaded
@@ -42,19 +54,41 @@ RUN python -c "\
 import sys; sys.path.insert(0, 'src'); \
 from fastembed import TextEmbedding; \
 from fastembed.rerank.cross_encoder import TextCrossEncoder; \
-from config import MODEL_CACHE_DIR, RERANKER_MODEL_NAME; \
-TextEmbedding(model_name='BAAI/bge-small-en-v1.5', cache_dir=str(MODEL_CACHE_DIR)); \
-TextCrossEncoder(model_name=RERANKER_MODEL_NAME, cache_dir=str(MODEL_CACHE_DIR)); \
+from config import MODEL_CACHE_DIR, RERANKER_MODEL_NAME, ONNX_NUM_THREADS; \
+TextEmbedding(model_name='BAAI/bge-small-en-v1.5', cache_dir=str(MODEL_CACHE_DIR), threads=ONNX_NUM_THREADS); \
+TextCrossEncoder(model_name=RERANKER_MODEL_NAME, cache_dir=str(MODEL_CACHE_DIR), threads=ONNX_NUM_THREADS); \
 print('Models pre-downloaded into image.')"
 
+# Build the Chroma vector index HERE, at Docker BUILD time, not at
+# container boot (2026-10-25, real deploy failure): a real deploy showed
+# embedding 50/299 chunks took ~3m49s and 100/299 took another ~3m53s on
+# Render's free-tier 0.1 vCPU -- all 299 chunks would take roughly
+# 20+ minutes, but Render's port-scan timeout kills an unresponsive boot
+# at ~5 minutes. threads=1 (above) ruled out a thread-pool hang; this is
+# genuine CPU starvation, not a bug to tune away. A docker BUILD step has
+# no such timeout, so running this once per git push (not once per
+# container restart/wake-up) is the real fix, not a workaround.
+#
+# TRADE-OFF, accepted: the Chroma index is now baked into the image
+# rather than rebuilt fresh every restart. This does NOT affect
+# data/processed/*.jsonl (golden_set_v*.jsonl, eval_custom_cases.jsonl,
+# etc.) -- those are still just files committed to git, read fresh by
+# the app at runtime regardless of when the image was built. It only
+# means a KB content change (editing data/chunks/*.jsonl) requires a new
+# git push to take effect, not a server restart -- which was already
+# true for a git-based deploy anyway.
+RUN python src/embed_and_store.py
+
 # Render's (and most container hosts') disk is ephemeral (wiped on every
-# redeploy/restart) -- chroma_db/, local_model_cache/, and sessions.db are
-# all rebuilt at container boot by docker-entrypoint.sh, not shipped in
-# the image or expected to persist. Every path these write to is
-# env-overridable (see src/config.py); CHROMA_DB_PATH/MODEL_CACHE_DIR/
-# SESSION_DB_PATH all default to paths under /app, which IS this
-# container's own ephemeral filesystem, so no extra env vars are needed
-# for this to work.
+# redeploy/restart), but that no longer matters for local_model_cache/ or
+# chroma_db/ -- both are baked into the image at BUILD time (above), so a
+# restart just reuses them unchanged, nothing to rebuild. Only
+# sessions.db is reseeded at boot (docker-entrypoint.sh) -- cheap, and it
+# genuinely needs to happen per-container since staff_accounts lives
+# there. Every path here is still env-overridable (see src/config.py);
+# CHROMA_DB_PATH/MODEL_CACHE_DIR/SESSION_DB_PATH all default to paths
+# under /app, which IS this container's own filesystem, so no extra env
+# vars are needed for this to work.
 
 # Render sets $PORT dynamically (default 10000) and requires binding
 # 0.0.0.0, not a fixed port -- ui/server.py already reads both HOST and

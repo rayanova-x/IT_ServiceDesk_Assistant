@@ -59,3 +59,20 @@ DATA_DIR = _path_from_env("DATA_DIR", REPO_ROOT / "data")
 # eval history, which was never re-run against it (a known, explicitly
 # accepted gap -- see README_DEPLOY.md).
 RERANKER_MODEL_NAME = os.environ.get("RERANKER_MODEL", "BAAI/bge-reranker-base")
+
+# ONNX Runtime thread count (2026-10-25, deployment bug fix): left
+# unset, fastembed lets onnxruntime auto-detect thread count from
+# os.cpu_count() -- but that reads the HOST's core count, not a
+# container's actual cgroup CPU quota (e.g. Render's free tier: 0.1
+# vCPU). The result isn't just slower, it HANGS: onnxruntime's thread
+# pool spins up threads sized for far more CPU than the quota grants,
+# and those threads busy-wait against a throttled quota rather than
+# degrading gracefully -- confirmed as the likely cause after a real
+# deploy sat silent for 30+ seconds inside model.embed() with zero
+# progress output, immediately after PYTHONUNBUFFERED=1 ruled out a
+# buffering explanation. ONNX_NUM_THREADS lets a deployment pin this
+# explicitly (fastembed's TextEmbedding/TextCrossEncoder both accept
+# threads=N, capping intra_op_num_threads AND inter_op_num_threads) --
+# None preserves today's local-dev auto-detect behavior unchanged.
+_onnx_threads = os.environ.get("ONNX_NUM_THREADS")
+ONNX_NUM_THREADS = int(_onnx_threads) if _onnx_threads else None
