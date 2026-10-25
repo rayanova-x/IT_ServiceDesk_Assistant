@@ -1,0 +1,8 @@
+{
+  "run_at": "2026-09-14T18:37:37.049020",
+  "n_synthesized": 7,
+  "n_candidates_only": 15,
+  "mean_faithfulness": 5.0,
+  "mean_relevance": 5.0,
+  "contract_violations": 0
+}

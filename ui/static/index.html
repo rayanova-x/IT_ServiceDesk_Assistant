@@ -1,0 +1,1473 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IT Helpdesk Assistant</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #F7F5EE;
+    --sidebar-bg: #161616;
+    --sidebar-fg: #f4f2ea;
+    --sidebar-hover: #262626;
+    --bubble-user: #6E9FE8;
+    --bubble-assistant: #ffffff;
+    --border: #161616;
+    --border-w: 2px;
+    --shadow: 4px 4px 0 0 var(--border);
+    --text: #161616;
+    --text-muted: rgba(22,22,22,0.62);
+    --caveat-bg: #fff1cf;
+    --caveat-border: #161616;
+    --alt-bg: #fbdede;
+    --alt-border: #161616;
+    --panel: #ffffff;
+    --accent-soft: #E4ECFB;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg); color: var(--text); height: 100vh; overflow: hidden;
+  }
+  .app { display: flex; height: 100vh; }
+
+  /* Sidebar */
+  .sidebar {
+    width: 280px; background: var(--sidebar-bg); color: var(--sidebar-fg);
+    display: flex; flex-direction: column; flex-shrink: 0;
+    border-right: var(--border-w) solid var(--border);
+  }
+  .sidebar-header { padding: 14px 14px 8px; font-weight: 600; font-size: 14.5px; }
+  .sidebar-tabs { display: flex; padding: 6px 10px 0; gap: 4px; }
+  .sidebar-tab {
+    flex: 1; text-align: center; padding: 8px 6px; font-size: 12px; font-weight: 600;
+    color: #9a9ba1; cursor: pointer; border-radius: 8px 8px 0 0; border-bottom: 2px solid transparent;
+  }
+  .sidebar-tab:hover { color: var(--sidebar-fg); }
+  .sidebar-tab.active { color: var(--sidebar-fg); border-bottom-color: var(--bubble-user); }
+  .sidebar-scroll { flex: 1; overflow-y: auto; }
+  .sidebar-tab-panel { display: none; }
+  .sidebar-tab-panel.active { display: block; }
+
+  .kb-search {
+    width: calc(100% - 20px); margin: 10px 10px 8px; padding: 8px 10px; border-radius: 8px;
+    border: var(--border-w) solid var(--border); font-size: 12.5px; font-family: inherit;
+    background: #fff; box-sizing: border-box;
+  }
+  .kb-search:focus { outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
+
+  .kb-group { margin: 0 10px 8px; }
+  .kb-group-header {
+    display: flex; align-items: center; justify-content: space-between; cursor: pointer;
+    padding: 9px 10px; border-radius: 8px; font-size: 12.5px; font-weight: 600; color: var(--sidebar-fg);
+  }
+  .kb-group-header:hover { background: var(--sidebar-hover); }
+  .kb-group-count { font-size: 11px; color: #9a9ba1; font-weight: 400; }
+  .kb-chevron { display: inline-block; margin-right: 6px; transition: transform 0.15s; color: #9a9ba1; }
+  .kb-group.expanded .kb-chevron { transform: rotate(90deg); }
+  .kb-group-pages { display: none; padding: 2px 0 2px 10px; }
+  .kb-group.expanded .kb-group-pages { display: block; }
+  .kb-page-item {
+    padding: 7px 10px; border-radius: 7px; cursor: pointer; font-size: 12.5px;
+    color: #cfd0d8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .kb-page-item:hover { background: var(--sidebar-hover); color: var(--sidebar-fg); }
+  .kb-empty-note { color: #7a7b85; font-size: 12px; padding: 10px; }
+
+  #kb-article-overlay {
+    position: fixed; inset: 0; background: rgba(22,22,22,0.4); display: flex;
+    align-items: center; justify-content: center; z-index: 110; padding: 40px;
+  }
+  #kb-article-modal {
+    background: var(--panel); border: var(--border-w) solid var(--border); border-radius: 14px;
+    box-shadow: 6px 6px 0 0 var(--border); width: 100%; max-width: 720px; max-height: 100%;
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  #kb-article-modal .article-panel-header { background: #F4F2EA; }
+  #kb-article-modal .article-panel-body { padding: 20px 26px; }
+  .sidebar-section-label {
+    padding: 10px 10px 4px; font-size: 11px; font-weight: 600; letter-spacing: 0.04em;
+    text-transform: uppercase; color: #7a7b85;
+  }
+  .sidebar-footer { padding: 10px; border-top: 1px solid #4d4d4f; font-size: 12px; color: #9a9ba1; }
+  .sidebar-footer a { color: #9a9ba1; }
+
+  /* Ticket list -- browse-first: clicking a row shows detail in the
+     main panel, it does NOT start a session. Only "Accept" does. */
+  .ticket-list { padding: 0 8px; }
+  .ticket-item {
+    display: flex; align-items: center; gap: 8px; padding: 9px 10px; border-radius: 8px;
+    cursor: pointer; font-size: 13px; margin-bottom: 2px;
+  }
+  .ticket-item:hover { background: var(--sidebar-hover); }
+  .ticket-item.active { background: #343541; }
+  .ticket-icon {
+    flex-shrink: 0; width: 20px; height: 20px; border-radius: 6px; display: flex;
+    align-items: center; justify-content: center; font-size: 11px; background: #3a3b45;
+  }
+  .ticket-icon.accepted { background: var(--bubble-user); }
+  .ticket-body { flex: 1; min-width: 0; overflow: hidden; }
+  .ticket-key { font-weight: 600; color: #dcdce3; }
+  .ticket-title {
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #b8b9c2; font-size: 12px;
+  }
+  .ticket-status { font-size: 10.5px; color: #9a9ba1; margin-top: 1px; }
+
+  .empty-note-dark { color: #7a7b85; font-size: 12.5px; padding: 10px; }
+
+  /* Main panel: ticket browser (summary/description/comments + Accept) */
+  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; overflow-y: auto; }
+  .main-inner { max-width: 760px; margin: 0 auto; padding: 32px 24px; width: 100%; }
+  .browser-empty { text-align: center; color: var(--text-muted); margin-top: 15vh; }
+  .browser-empty h1 { font-size: 22px; color: var(--text); }
+
+  .ticket-detail-header { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 4px; }
+  .ticket-detail-header h2 { font-size: 20px; margin: 0; }
+  .status-pill {
+    font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 12px;
+    background: #e2e8fd; color: #345; flex-shrink: 0;
+  }
+  .ticket-detail-key { color: var(--text-muted); font-size: 13px; margin-bottom: 18px; }
+
+  .detail-section { margin-top: 22px; }
+  .detail-section h3 { font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.03em; color: var(--text-muted); margin: 0 0 8px; }
+  .detail-body-text { white-space: pre-wrap; line-height: 1.6; font-size: 14.5px; }
+  .comment-item { padding: 10px 0; border-top: 1px solid var(--border); }
+  .comment-item:first-child { border-top: none; }
+  .comment-meta { font-size: 12px; color: var(--text-muted); margin-bottom: 3px; }
+  .comment-meta strong { color: var(--text); }
+
+  .accept-row { margin-top: 28px; display: flex; align-items: center; gap: 12px; }
+  .accept-btn {
+    background: var(--bubble-user); color: white; border: var(--border-w) solid var(--border); border-radius: 10px;
+    padding: 11px 20px; font-size: 14px; cursor: pointer; font-weight: 700; box-shadow: var(--shadow);
+  }
+  .accept-btn:disabled { background: #cdd8ee; color: rgba(22,22,22,0.5); cursor: default; box-shadow: none; }
+  .accept-btn.secondary { background: var(--accent-soft); color: var(--text); }
+  .accepted-note { color: var(--bubble-user); font-size: 13px; font-weight: 700; }
+
+  /* --- Floating chat tray (bottom-right) ------------------------------ */
+  .chat-tray {
+    position: fixed; bottom: 16px; right: 16px; display: flex; gap: 10px;
+    align-items: flex-end; z-index: 50; pointer-events: none;
+  }
+  .tray-tabs { display: flex; flex-direction: column; gap: 8px; pointer-events: auto; }
+  .tray-tab {
+    width: 52px; height: 52px; border-radius: 50%; background: var(--bubble-user); color: white;
+    display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700;
+    cursor: pointer; box-shadow: var(--shadow); border: var(--border-w) solid var(--border); position: relative;
+  }
+  .tray-tab.freeform { background: #4a4b57; }
+  .tray-tab .unread-dot {
+    position: absolute; top: -3px; right: -3px; width: 12px; height: 12px; border-radius: 50%;
+    background: #e05d5d; border: 2px solid var(--bg); display: none;
+  }
+  .tray-tab.has-unread .unread-dot { display: block; }
+  .tray-tab .close-x {
+    position: absolute; top: -5px; left: -5px; width: 18px; height: 18px; border-radius: 50%;
+    background: #3a3b45; color: #ddd; font-size: 11px; display: none; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .tray-tab:hover .close-x { display: flex; }
+
+  /* Floating, resizable chat window */
+  .chat-window {
+    position: fixed; width: 400px; height: 560px; min-width: 320px; min-height: 360px;
+    background: var(--panel); border: var(--border-w) solid var(--border); border-radius: 14px;
+    box-shadow: 6px 6px 0 0 var(--border); display: flex; flex-direction: column;
+    overflow: hidden; resize: both; z-index: 60;
+  }
+  /* When an article is open, the window becomes a two-column layout:
+     chat on the left, article panel on the right -- widened so neither
+     side gets cramped, still one floating/resizable window, not a
+     second independent popup to drag/manage. */
+  .chat-window.with-article { flex-direction: row; width: 780px; min-width: 620px; }
+  .chat-window.with-article .chat-col { width: 380px; flex-shrink: 0; display: flex; flex-direction: column; border-right: 1px solid var(--border); min-height: 0; }
+  .chat-col { display: flex; flex-direction: column; flex: 1; min-width: 0; min-height: 0; }
+
+  .article-panel {
+    display: none; flex-direction: column; flex: 1; min-width: 0; min-height: 0; background: #fcfcfd;
+  }
+  .chat-window.with-article .article-panel { display: flex; }
+  .article-panel-header {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 10px 14px; border-bottom: 1px solid var(--border); background: #fafafa; flex-shrink: 0;
+  }
+  .article-panel-title { font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .article-panel-meta { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+  .article-panel-close {
+    width: 22px; height: 22px; border: none; background: transparent; border-radius: 6px;
+    cursor: pointer; font-size: 13px; color: var(--text-muted); flex-shrink: 0;
+  }
+  .article-panel-close:hover { background: var(--border); }
+  .article-panel-body { flex: 1; overflow-y: auto; padding: 16px 18px; font-size: 13px; line-height: 1.55; }
+  .article-panel-body h1, .article-panel-body h2, .article-panel-body h3 { font-size: 14px; margin: 14px 0 6px; }
+  .article-panel-body p { margin: 0 0 8px; }
+  .article-panel-body :target {
+    background: #fff3b0; border-radius: 4px; padding: 2px 4px; margin: 0 -4px;
+    scroll-margin-top: 16px;
+  }
+  .article-panel-loading, .article-panel-error { padding: 20px; color: var(--text-muted); font-size: 12.5px; text-align: center; }
+
+  /* Citation chips, replacing the flat staleness-disclosure text */
+  .citation-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 7px; }
+  .citation-chip {
+    background: #eef2ff; border: 1px solid #c7d2fe; color: #3730a3; border-radius: 7px;
+    padding: 4px 9px; font-size: 11.5px; cursor: pointer; display: flex; align-items: center; gap: 5px;
+  }
+  .citation-chip:hover { background: #e0e7ff; }
+  .citation-chip .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #16a34a; flex-shrink: 0; }
+  .citation-chip.stale .status-dot { background: #d97706; }
+  .chat-window-header {
+    display: flex; align-items: center; justify-content: space-between; padding: 10px 12px;
+    border-bottom: 1px solid var(--border); background: #fafafa; cursor: move; flex-shrink: 0;
+  }
+  .chat-window-title { font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .chat-window-title .sub { font-weight: 400; color: var(--text-muted); margin-left: 4px; }
+  .chat-window-controls { display: flex; gap: 6px; flex-shrink: 0; align-items: center; }
+  .chat-window-controls button {
+    width: 22px; height: 22px; border: none; background: transparent; border-radius: 6px;
+    cursor: pointer; font-size: 13px; color: var(--text-muted); display: flex; align-items: center; justify-content: center;
+  }
+  .chat-window-controls button:hover { background: var(--border); }
+
+  /* Session switcher -- ticket chats only, lets a staffer start a new
+     session on a ticket without losing the old one's history (every
+     prior session stays fully intact, see chat_service.ticket_session_id()). */
+  .session-switcher { position: relative; }
+  .session-switcher-btn {
+    font-size: 10.5px; color: var(--text-muted); background: transparent; border: 1px solid var(--border);
+    border-radius: 6px; padding: 2px 7px; cursor: pointer; white-space: nowrap;
+  }
+  .session-switcher-btn:hover { background: var(--border); }
+  .session-switcher-menu {
+    display: none; position: absolute; top: 26px; right: 0; background: var(--panel);
+    border: 1px solid var(--border); border-radius: 9px; box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    min-width: 180px; z-index: 70; overflow: hidden;
+  }
+  .session-switcher-menu.open { display: block; }
+  .session-switcher-item {
+    padding: 8px 12px; font-size: 12px; cursor: pointer; border-bottom: 1px solid var(--grid-line);
+  }
+  .session-switcher-item:last-child { border-bottom: none; }
+  .session-switcher-item:hover { background: #fafafa; }
+  .session-switcher-item.active { background: var(--accent-soft, #e6f5f0); font-weight: 600; }
+  .session-switcher-new {
+    padding: 8px 12px; font-size: 12px; cursor: pointer; color: var(--bubble-user);
+    font-weight: 600; border-top: 1px solid var(--grid-line);
+  }
+  .session-switcher-new:hover { background: #fafafa; }
+
+  .chat-scroll { flex: 1; overflow-y: auto; padding: 16px; }
+  .chat-inner { display: flex; flex-direction: column; }
+  .empty-state { text-align: center; color: var(--text-muted); margin-top: 20%; font-size: 13px; }
+
+  .msg-row { display: flex; margin-bottom: 14px; }
+  .msg-row.user { justify-content: flex-end; }
+  .bubble {
+    max-width: 85%; padding: 10px 13px; border-radius: 13px; line-height: 1.45; font-size: 13.5px;
+    white-space: pre-wrap; word-wrap: break-word;
+  }
+  .msg-row.user .bubble { background: var(--bubble-user); color: white; border-bottom-right-radius: 4px; border: var(--border-w) solid var(--border); }
+  .msg-row.assistant .bubble { background: #F4F2EA; border: var(--border-w) solid var(--border); border-bottom-left-radius: 4px; }
+
+  .caveat-box {
+    background: var(--caveat-bg); border: 1px solid var(--caveat-border); border-radius: 9px;
+    padding: 8px 11px; font-size: 12.5px; margin-top: 7px;
+  }
+  .alt-box {
+    background: var(--alt-bg); border: 1px solid var(--alt-border); border-radius: 9px;
+    padding: 8px 11px; font-size: 12px; margin-top: 7px;
+  }
+  .alt-box .alt-title { font-weight: 600; margin-bottom: 3px; }
+  .staleness {
+    margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--border);
+    font-size: 11px; color: var(--text-muted); white-space: pre-wrap;
+  }
+  .badge {
+    display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 6px;
+    border-radius: 6px; margin-right: 5px; vertical-align: middle;
+  }
+  .badge.low-confidence { background: #fde2e2; color: #a33; }
+  .badge.candidates { background: #e2e8fd; color: #345; }
+
+  .composer { border-top: 1px solid var(--border); padding: 10px; flex-shrink: 0; }
+  .composer-inner { display: flex; gap: 8px; align-items: flex-end; }
+  .composer-input {
+    flex: 1; resize: none; border: 1px solid var(--border); border-radius: 10px; padding: 9px 11px;
+    font-size: 13.5px; font-family: inherit; max-height: 120px; min-height: 38px;
+  }
+  .composer-input:focus { outline: 2px solid var(--bubble-user); outline-offset: -1px; }
+  .send-btn {
+    background: var(--bubble-user); color: white; border: var(--border-w) solid var(--border); border-radius: 9px;
+    width: 38px; height: 38px; cursor: pointer; flex-shrink: 0; font-size: 15px;
+  }
+  .send-btn:disabled { background: #cdd8ee; color: rgba(22,22,22,0.5); cursor: default; }
+  .thinking { color: var(--text-muted); font-style: italic; font-size: 13px; }
+
+  /* Login overlay */
+  #login-overlay {
+    position: fixed; inset: 0; background: var(--bg); display: flex;
+    align-items: center; justify-content: center; z-index: 100; overflow-y: auto; padding: 32px 16px;
+  }
+  #login-shell { width: 100%; max-width: 640px; }
+  #login-shell h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.01em; margin: 0 0 4px; text-align: center; }
+  #login-shell p.lead { color: var(--text-muted); font-size: 13px; margin: 0 0 24px; text-align: center; }
+
+  .persona-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
+  .persona-card {
+    background: #fff; border: var(--border-w) solid var(--border); border-radius: 12px;
+    padding: 14px 16px; box-shadow: var(--shadow); cursor: pointer; text-align: left;
+    transition: transform 0.12s var(--ease), box-shadow 0.12s var(--ease);
+  }
+  .persona-card:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 0 var(--border); }
+  .persona-card:disabled { opacity: 0.6; cursor: default; transform: none; box-shadow: var(--shadow); }
+  .persona-name { font-size: 14.5px; font-weight: 700; }
+  .persona-role { font-size: 11.5px; color: var(--bubble-user); font-weight: 600; margin-top: 2px; }
+  .persona-access { font-size: 11.5px; color: var(--text-muted); margin-top: 6px; line-height: 1.45; }
+  .persona-access strong { color: var(--text); }
+
+  #login-divider { display: flex; align-items: center; gap: 10px; color: var(--text-muted); font-size: 11.5px; margin: 6px 0 18px; }
+  #login-divider::before, #login-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); opacity: 0.3; }
+
+  #login-card {
+    background: #fff; border: var(--border-w) solid var(--border); border-radius: 14px;
+    padding: 24px 28px; width: 280px; margin: 0 auto; box-shadow: 6px 6px 0 0 var(--border);
+  }
+  #login-card h2 { margin: 0 0 4px; font-size: 16px; font-weight: 700; letter-spacing: -0.01em; }
+  #login-card p.hint { color: var(--text-muted); font-size: 12px; margin: 0 0 18px; }
+  #login-card input {
+    width: 100%; padding: 9px 10px; margin-bottom: 10px; border: var(--border-w) solid var(--border);
+    border-radius: 8px; font-size: 14px; box-sizing: border-box; font-family: inherit;
+  }
+  #login-card input:focus { outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
+  #login-card button {
+    width: 100%; padding: 9px; background: var(--bubble-user); color: #fff; border: var(--border-w) solid var(--border);
+    border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; margin-top: 4px; box-shadow: var(--shadow);
+  }
+  #login-error { color: #a3242a; font-size: 12.5px; margin-top: 8px; min-height: 16px; }
+  #guest-banner {
+    display: none; background: var(--accent-soft); border: var(--border-w) solid var(--border);
+    border-radius: 10px; padding: 8px 12px; font-size: 12px; margin: 0 0 14px; text-align: center;
+  }
+  #staff-identity { font-size: 12px; color: var(--sidebar-fg); opacity: 0.75; margin-bottom: 4px; }
+  #staff-identity button {
+    background: none; border: none; color: inherit; text-decoration: underline; cursor: pointer;
+    font-size: 11px; padding: 0; margin-left: 6px; opacity: 0.8;
+  }
+</style>
+</head>
+<body>
+<div id="login-overlay" style="display:none;">
+  <div id="login-shell">
+    <h1>IT Helpdesk Assistant</h1>
+    <p class="lead">Pick a demo persona to try it out instantly, or sign in with your own account.</p>
+    <div id="guest-banner">You're exploring as a demo persona. Nothing here is saved beyond this session.</div>
+    <div class="persona-grid" id="persona-grid"></div>
+    <div id="login-divider">or sign in with your own account</div>
+    <div id="login-card">
+      <h2>Staff sign-in</h2>
+      <p class="hint">Sign in with your staff account.</p>
+      <input id="login-username" placeholder="Username" autocomplete="username">
+      <input id="login-password" type="password" placeholder="Password" autocomplete="current-password">
+      <button id="login-btn">Sign in</button>
+      <div id="login-error"></div>
+    </div>
+  </div>
+</div>
+
+<div class="app">
+  <div class="sidebar">
+    <div class="sidebar-header">IT Helpdesk Assistant</div>
+    <div class="sidebar-tabs">
+      <div class="sidebar-tab active" data-sidebar-tab="tickets">Tickets</div>
+      <div class="sidebar-tab" data-sidebar-tab="kb">Knowledge Base</div>
+    </div>
+    <div class="sidebar-scroll">
+      <div class="sidebar-tab-panel active" id="sidebar-panel-tickets">
+        <div class="ticket-list" id="ticket-list"></div>
+      </div>
+      <div class="sidebar-tab-panel" id="sidebar-panel-kb">
+        <input type="text" class="kb-search" id="kb-search" placeholder="Search your knowledge base...">
+        <div id="kb-groups"></div>
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <div id="staff-identity"></div>
+      <span id="monitoring-summary">Loading monitoring...</span>
+      <div style="margin-top:6px;"><a href="/dashboard">View full dashboard &rarr;</a></div>
+    </div>
+  </div>
+
+  <div class="main" id="main-panel">
+    <div class="main-inner">
+      <div class="browser-empty" id="browser-empty">
+        <h1>Select a ticket</h1>
+        <p>Pick a ticket from the list to read its details, then accept it to start working it with the assistant.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Floating chat tray + windows are built entirely in JS (see
+     openChats below) -- no static markup needed here. -->
+<div class="chat-tray" id="chat-tray"></div>
+
+<!-- Standalone KB article viewer -- opened from the sidebar's Knowledge
+     Base tab, independent of any chat window (unlike openArticlePanel(),
+     which needs an already-open chat). Reuses the same .article-panel-*
+     classes/rendering as the in-chat citation panel for visual
+     consistency. -->
+<div id="kb-article-overlay" style="display:none;">
+  <div id="kb-article-modal">
+    <div class="article-panel-header">
+      <div>
+        <div class="article-panel-title" id="kb-article-title"></div>
+        <div class="article-panel-meta" id="kb-article-meta"></div>
+      </div>
+      <button class="article-panel-close" id="kb-article-close" title="Close article">&times;</button>
+    </div>
+    <div class="article-panel-body" id="kb-article-body"></div>
+  </div>
+</div>
+
+<script>
+// ===========================================================================
+// State
+// ===========================================================================
+// openChats: one entry per floating chat window currently open (ticket-
+// scoped OR freeform "+ New chat"). Each is fully independent -- its own
+// session_id, its own DOM, its own in-flight request state. This is what
+// makes "multiple floating chats, stacked" possible: nothing here is a
+// single global currentSessionId/currentTicketKey the way the old layout had.
+//
+// chatId is: `ticket:${issueKey}` for a ticket-scoped chat (stable, so
+// re-accepting/reopening the same ticket reuses the same window instead of
+// spawning a duplicate), or `freeform:${n}` for an untethered "+ New chat".
+const openChats = {};  // chatId -> { sessionId, ticketKey, title, el, minimized, hasUnread }
+let freeformCounter = 0;
+let selectedTicketKey = null; // which ticket's detail is showing in the main panel
+
+const ticketList = document.getElementById('ticket-list');
+const mainPanel = document.getElementById('main-panel');
+const chatTray = document.getElementById('chat-tray');
+
+// ===========================================================================
+// Sidebar tab switching (Tickets / Knowledge Base)
+// ===========================================================================
+document.querySelectorAll('.sidebar-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.sidebar-tab-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(`sidebar-panel-${tab.dataset.sidebarTab}`).classList.add('active');
+    if (tab.dataset.sidebarTab === 'kb' && !kbPagesLoaded) loadKbPages();
+  });
+});
+
+// ===========================================================================
+// Knowledge Base sidebar tab -- every page this logged-in staffer can
+// access, grouped by category (same category golden-set-style accordion
+// pattern as /evals), click opens the standalone article modal below.
+// ===========================================================================
+let kbPagesLoaded = false;
+let kbPagesByCategory = {};
+
+async function loadKbPages() {
+  const container = document.getElementById('kb-groups');
+  container.innerHTML = '<div class="kb-empty-note">Loading...</div>';
+  try {
+    const res = await fetch('/api/kb-pages/mine');
+    if (res.status === 401) { showLoginOverlay(); return; }
+    const pages = await res.json();
+    kbPagesLoaded = true;
+    kbPagesByCategory = {};
+    pages.forEach(p => {
+      (kbPagesByCategory[p.category] = kbPagesByCategory[p.category] || []).push(p);
+    });
+    renderKbGroups(pages);
+  } catch (err) {
+    container.innerHTML = `<div class="kb-empty-note">Could not load the knowledge base: ${err}</div>`;
+  }
+}
+
+function renderKbGroups(pages) {
+  const container = document.getElementById('kb-groups');
+  container.innerHTML = '';
+  if (!pages.length) {
+    container.innerHTML = '<div class="kb-empty-note">No articles available for your account.</div>';
+    return;
+  }
+  const categories = Object.keys(kbPagesByCategory).sort();
+  categories.forEach(cat => {
+    const items = kbPagesByCategory[cat].filter(p => pages.includes(p));
+    if (!items.length) return;
+    const group = document.createElement('div');
+    group.className = 'kb-group';
+    const header = document.createElement('div');
+    header.className = 'kb-group-header';
+    header.innerHTML = `<span><span class="kb-chevron">&#9656;</span>${cat}</span>` +
+      `<span class="kb-group-count">${items.length}</span>`;
+    header.addEventListener('click', () => group.classList.toggle('expanded'));
+    group.appendChild(header);
+
+    const pagesDiv = document.createElement('div');
+    pagesDiv.className = 'kb-group-pages';
+    items.forEach(p => {
+      const item = document.createElement('div');
+      item.className = 'kb-page-item';
+      item.textContent = p.title;
+      item.title = p.title;
+      item.addEventListener('click', () => openKbArticleModal(p.page_id));
+      pagesDiv.appendChild(item);
+    });
+    group.appendChild(pagesDiv);
+    container.appendChild(group);
+  });
+}
+
+document.getElementById('kb-search').addEventListener('input', (e) => {
+  const q = e.target.value.trim().toLowerCase();
+  const all = Object.values(kbPagesByCategory).flat();
+  const filtered = q ? all.filter(p => p.title.toLowerCase().includes(q)) : all;
+  renderKbGroups(filtered);
+  if (q) document.querySelectorAll('.kb-group').forEach(g => g.classList.add('expanded'));
+});
+
+// Standalone article modal -- independent of any chat window, unlike
+// openArticlePanel() below which requires one already open.
+async function openKbArticleModal(pageId) {
+  const overlay = document.getElementById('kb-article-overlay');
+  const titleEl = document.getElementById('kb-article-title');
+  const metaEl = document.getElementById('kb-article-meta');
+  const bodyEl = document.getElementById('kb-article-body');
+  overlay.style.display = 'flex';
+  titleEl.textContent = 'Loading…';
+  metaEl.textContent = '';
+  bodyEl.innerHTML = '<div class="article-panel-loading">Loading article…</div>';
+  try {
+    const res = await fetch(`/api/articles/${encodeURIComponent(pageId)}`);
+    if (res.status === 401) { showLoginOverlay(); return; }
+    if (res.status === 404) {
+      titleEl.textContent = 'Not available';
+      bodyEl.innerHTML = '<div class="article-panel-error">This article could not be found, or you don\'t have access to it.</div>';
+      return;
+    }
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const article = await res.json();
+    titleEl.textContent = article.title;
+    metaEl.textContent = `Page ${article.page_id} · ${article.status} · Updated ${article.last_updated}`;
+    bodyEl.innerHTML = article.html;
+    bodyEl.scrollTop = 0;
+  } catch (err) {
+    titleEl.textContent = 'Error';
+    bodyEl.innerHTML = `<div class="article-panel-error">Could not load this article: ${err}</div>`;
+  }
+}
+
+function closeKbArticleModal() {
+  document.getElementById('kb-article-overlay').style.display = 'none';
+}
+document.getElementById('kb-article-close').addEventListener('click', closeKbArticleModal);
+document.getElementById('kb-article-overlay').addEventListener('click', (e) => {
+  if (e.target.id === 'kb-article-overlay') closeKbArticleModal();
+});
+
+// ===========================================================================
+// SSE helper (shared by every chat window)
+// ===========================================================================
+async function readSSE(response, onEvent) {
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const frames = buffer.split('\n\n');
+    buffer = frames.pop();
+    for (const frame of frames) {
+      if (!frame.trim()) continue;
+      let eventName = 'message';
+      let dataLine = '';
+      frame.split('\n').forEach(line => {
+        if (line.startsWith('event: ')) eventName = line.slice(7);
+        else if (line.startsWith('data: ')) dataLine = line.slice(6);
+      });
+      onEvent(eventName, dataLine ? JSON.parse(dataLine) : {});
+    }
+  }
+}
+
+// ===========================================================================
+// Ticket browser (main panel)
+// ===========================================================================
+async function loadTickets() {
+  const res = await fetch('/api/tickets');
+  if (res.status === 401) { showLoginOverlay(); return; }
+  if (!res.ok) return;
+  const tickets = await res.json();
+  ticketList.innerHTML = '';
+  if (!tickets.length) {
+    ticketList.innerHTML = '<div class="empty-note-dark">No open tickets.</div>';
+    return;
+  }
+  tickets.forEach(t => {
+    const item = document.createElement('div');
+    item.className = 'ticket-item' + (t.key === selectedTicketKey ? ' active' : '');
+    const icon = document.createElement('div');
+    icon.className = 'ticket-icon' + (t.has_session ? ' accepted' : '');
+    icon.textContent = t.has_session ? '✓' : t.key.split('-')[1]?.slice(0, 2) || '?';
+    const body = document.createElement('div');
+    body.className = 'ticket-body';
+    body.innerHTML = `<span class="ticket-key">${t.key}</span> ` +
+      `<span class="ticket-title">${t.summary}</span>` +
+      `<div class="ticket-status">${t.status}${t.has_session ? ' · accepted' : ''}</div>`;
+    item.appendChild(icon);
+    item.appendChild(body);
+    item.addEventListener('click', () => selectTicket(t.key));
+    ticketList.appendChild(item);
+  });
+}
+
+async function selectTicket(issueKey) {
+  selectedTicketKey = issueKey;
+  document.querySelectorAll('.ticket-item').forEach(el => el.classList.remove('active'));
+  loadTickets(); // re-render to show the active highlight
+
+  mainPanel.querySelector('.main-inner').innerHTML = '<div class="browser-empty"><h1>Loading…</h1></div>';
+  const res = await fetch(`/api/tickets/${issueKey}`);
+  if (res.status === 401) { showLoginOverlay(); return; }
+  if (!res.ok) {
+    mainPanel.querySelector('.main-inner').innerHTML =
+      `<div class="browser-empty"><h1>Could not load ${issueKey}</h1><p>HTTP ${res.status}</p></div>`;
+    return;
+  }
+  const detail = await res.json();
+  renderTicketDetail(detail);
+}
+
+function renderTicketDetail(detail) {
+  const inner = mainPanel.querySelector('.main-inner');
+  const chatId = `ticket:${detail.key}`;
+  const alreadyOpen = !!openChats[chatId];
+
+  let commentsHtml = '<p style="color:var(--text-muted);font-size:13px;">No comments yet.</p>';
+  if (detail.comments.length) {
+    commentsHtml = detail.comments.map(c =>
+      `<div class="comment-item"><div class="comment-meta"><strong>${c.author}</strong> &middot; ${c.created}</div>` +
+      `<div class="detail-body-text">${c.body_text}</div></div>`
+    ).join('');
+  }
+
+  inner.innerHTML = `
+    <div class="ticket-detail-header">
+      <h2>${detail.summary}</h2>
+      <span class="status-pill">${detail.status}</span>
+    </div>
+    <div class="ticket-detail-key">${detail.key}</div>
+    <div class="detail-section">
+      <h3>Description</h3>
+      <div class="detail-body-text">${detail.description_text || '<em>No description.</em>'}</div>
+    </div>
+    <div class="detail-section">
+      <h3>Comments (${detail.comments.length})</h3>
+      ${commentsHtml}
+    </div>
+    <div class="accept-row" id="accept-row"></div>
+  `;
+
+  const acceptRow = document.getElementById('accept-row');
+  if (detail.has_session || alreadyOpen) {
+    acceptRow.innerHTML = '<span class="accepted-note">&#10003; Accepted</span>';
+    const openBtn = document.createElement('button');
+    openBtn.className = 'accept-btn secondary';
+    openBtn.textContent = alreadyOpen ? 'Bring chat to front' : 'Open chat';
+    openBtn.onclick = () => openOrFocusTicketChat(detail.key, detail.summary, /*alreadySeeded*/ true);
+    acceptRow.appendChild(openBtn);
+  } else {
+    const btn = document.createElement('button');
+    btn.className = 'accept-btn';
+    btn.textContent = 'Accept ticket';
+    btn.onclick = () => {
+      btn.disabled = true;
+      btn.textContent = 'Accepting…';
+      acceptTicket(detail.key, detail.summary);
+    };
+    acceptRow.appendChild(btn);
+  }
+}
+
+async function acceptTicket(issueKey, summary) {
+  // "Accept" is the explicit commit action -- this is what actually
+  // seeds the session (fetches the real ticket content from Jira,
+  // feeds it through the real pipeline as the first turn). Re-renders
+  // the detail panel afterward so the Accept button becomes "Accepted".
+  openOrFocusTicketChat(issueKey, summary, /*alreadySeeded*/ false);
+  loadTickets();
+  if (selectedTicketKey === issueKey) {
+    const res = await fetch(`/api/tickets/${issueKey}`);
+    if (res.ok) renderTicketDetail(await res.json());
+  }
+}
+
+// ===========================================================================
+// Floating chat windows
+// ===========================================================================
+function openOrFocusTicketChat(issueKey, title, alreadySeeded, sessionNumber = 1) {
+  // chatId stays keyed by issueKey alone (not session number) -- only
+  // ONE floating window per ticket at a time, same as before; switching
+  // sessions reuses the same window rather than opening a second one.
+  const chatId = `ticket:${issueKey}`;
+  if (openChats[chatId]) {
+    expandChat(chatId);
+    if (openChats[chatId].sessionNumber !== sessionNumber) {
+      switchTicketSession(chatId, sessionNumber);
+    }
+    return;
+  }
+  createChatWindow(chatId, { ticketKey: issueKey, title, isFreeform: false });
+  openChats[chatId].sessionNumber = sessionNumber;
+  // A ticket session's ID is DETERMINISTIC (ticket_session_id() in
+  // chat_service.py -- "jira:<KEY>" for session 1, "jira:<KEY>::N" for
+  // later ones, never a random UUID) -- set it immediately,
+  // synchronously, rather than waiting for a server round-trip to
+  // report it back. Fixes two real bugs found 2026-10-24: (1) typing
+  // fast enough to send a message before seedTicketSession's async call
+  // completed sent session_id=null, which the server silently turned
+  // into a brand-new disconnected random session (the window kept
+  // showing the ticket's header throughout, so this was invisible --
+  // looked like a normal ticket conversation that had lost all
+  // context); (2) replayTicketSession (reopening an already-seeded
+  // ticket) never set chat.sessionId AT ALL, so every message in a
+  // reopened ticket window hit the same bug, not just the first one.
+  openChats[chatId].sessionId = ticketSessionId(issueKey, sessionNumber);
+  if (alreadySeeded) {
+    replayTicketSession(chatId, issueKey, sessionNumber);
+  } else {
+    seedTicketSession(chatId, issueKey, title, sessionNumber);
+  }
+  loadSessionSwitcherMenu(chatId, issueKey);
+}
+
+function ticketSessionId(issueKey, sessionNumber = 1) {
+  return sessionNumber <= 1 ? `jira:${issueKey}` : `jira:${issueKey}::${sessionNumber}`;
+}
+
+// ===========================================================================
+// Session switcher -- lets a staffer start a new session on a ticket
+// without losing the old one's history, or jump back to a prior one.
+// Added 2026-10-25.
+// ===========================================================================
+async function loadSessionSwitcherMenu(chatId, issueKey) {
+  const chat = openChats[chatId];
+  if (!chat) return;
+  const menu = chat.el.querySelector('.session-switcher-menu');
+  const btn = chat.el.querySelector('[data-action="session-switcher-toggle"]');
+  if (!menu || !btn) return;
+
+  try {
+    const res = await fetch(`/api/tickets/${issueKey}/sessions`);
+    const sessions = res.ok ? await res.json() : [];
+    btn.textContent = `Session ${chat.sessionNumber} ▾`;
+
+    menu.innerHTML = sessions.map(s => {
+      const label = s.n_turns > 0
+        ? `Session ${s.session_number} (${s.n_turns} turn${s.n_turns === 1 ? '' : 's'})`
+        : `Session ${s.session_number} (not started)`;
+      const activeCls = s.session_number === chat.sessionNumber ? ' active' : '';
+      return `<div class="session-switcher-item${activeCls}" data-session-number="${s.session_number}">${label}</div>`;
+    }).join('') + `<div class="session-switcher-new">+ Start new session</div>`;
+
+    menu.querySelectorAll('.session-switcher-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const n = parseInt(item.dataset.sessionNumber, 10);
+        menu.classList.remove('open');
+        if (n !== chat.sessionNumber) switchTicketSession(chatId, n);
+      });
+    });
+    menu.querySelector('.session-switcher-new').addEventListener('click', () => {
+      menu.classList.remove('open');
+      const nextNumber = Math.max(...sessions.map(s => s.session_number)) + 1;
+      switchTicketSession(chatId, nextNumber, /*isNew*/ true);
+    });
+  } catch (err) {
+    menu.innerHTML = `<div class="session-switcher-item">Error: ${err}</div>`;
+  }
+
+  btn.onclick = (e) => {
+    e.stopPropagation();
+    document.querySelectorAll('.session-switcher-menu.open').forEach(m => { if (m !== menu) m.classList.remove('open'); });
+    menu.classList.toggle('open');
+  };
+}
+
+document.addEventListener('click', () => {
+  document.querySelectorAll('.session-switcher-menu.open').forEach(m => m.classList.remove('open'));
+});
+
+async function switchTicketSession(chatId, sessionNumber, isNew = false) {
+  const chat = openChats[chatId];
+  if (!chat) return;
+  chat.sessionNumber = sessionNumber;
+  chat.sessionId = ticketSessionId(chat.ticketKey, sessionNumber);
+
+  // Clear the chat body and reload for the switched-to session, same
+  // "disable composer until ready" pattern as the initial open.
+  const inner = chatInnerOf(chatId);
+  inner.innerHTML = '<div class="empty-state">Loading…</div>';
+  const input = chat.el.querySelector('.composer-input');
+  const sendBtn = chat.el.querySelector('.send-btn');
+  input.disabled = true;
+  sendBtn.disabled = true;
+  input.placeholder = 'Loading…';
+
+  if (isNew) {
+    await seedTicketSession(chatId, chat.ticketKey, chat.title, sessionNumber);
+  } else {
+    const res = await fetch(`/api/tickets/${chat.ticketKey}/session?session_number=${sessionNumber}`);
+    const turns = res.ok ? await res.json() : [];
+    if (turns.length > 0) {
+      await replayTicketSession(chatId, chat.ticketKey, sessionNumber);
+    } else {
+      // A listed-but-never-seeded session (shouldn't normally happen
+      // via the switcher, since the list only offers real/new sessions,
+      // but handled defensively) -- seed it same as "start new."
+      await seedTicketSession(chatId, chat.ticketKey, chat.title, sessionNumber);
+    }
+  }
+  loadSessionSwitcherMenu(chatId, chat.ticketKey);
+}
+
+function openNewFreeformChat() {
+  freeformCounter += 1;
+  const chatId = `freeform:${freeformCounter}`;
+  createChatWindow(chatId, { ticketKey: null, title: 'New chat', isFreeform: true });
+}
+
+function createChatWindow(chatId, { ticketKey, title, isFreeform }) {
+  const win = document.createElement('div');
+  win.className = 'chat-window';
+  win.style.right = `${16 + 70 * Object.keys(openChats).length}px`;
+  win.style.bottom = '84px';
+  win.innerHTML = `
+    <div class="chat-col">
+      <div class="chat-window-header" data-drag-handle>
+        <div class="chat-window-title">${ticketKey ? `${ticketKey}<span class="sub">${title}</span>` : title}</div>
+        <div class="chat-window-controls">
+          ${ticketKey ? `
+          <div class="session-switcher">
+            <button class="session-switcher-btn" data-action="session-switcher-toggle">Session 1 &#9662;</button>
+            <div class="session-switcher-menu"></div>
+          </div>` : ''}
+          <button data-action="minimize" title="Minimize">&#8211;</button>
+          <button data-action="close" title="Close">&times;</button>
+        </div>
+      </div>
+      <div class="chat-scroll"><div class="chat-inner"><div class="empty-state">Starting…</div></div></div>
+      <div class="composer">
+        <div class="composer-inner">
+          <textarea class="composer-input" placeholder="Message the assistant..." rows="1"></textarea>
+          <button class="send-btn">&#8593;</button>
+        </div>
+      </div>
+    </div>
+    <div class="article-panel">
+      <div class="article-panel-header">
+        <div>
+          <div class="article-panel-title"></div>
+          <div class="article-panel-meta"></div>
+        </div>
+        <button class="article-panel-close" data-action="close-article" title="Close article">&times;</button>
+      </div>
+      <div class="article-panel-body"></div>
+    </div>
+  `;
+  document.body.appendChild(win);
+
+  openChats[chatId] = {
+    sessionId: null, ticketKey, title, isFreeform, el: win, minimized: false, hasUnread: false,
+  };
+
+  makeDraggable(win, win.querySelector('[data-drag-handle]'));
+
+  const input = win.querySelector('.composer-input');
+  const sendBtn = win.querySelector('.send-btn');
+  const autoGrow = () => { input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 120) + 'px'; };
+  input.addEventListener('input', autoGrow);
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessageInChat(chatId); }
+  });
+  sendBtn.addEventListener('click', () => sendMessageInChat(chatId));
+
+  // Real bug fixed 2026-10-24: a ticket chat's sessionId starts null and
+  // is only set once seedTicketSession()/replayTicketSession() gets its
+  // first response back. Typing fast enough to send BEFORE that
+  // completes sent session_id=null to the server, which silently minted
+  // a brand-new random/freeform session disconnected from the ticket --
+  // the window still showed the ticket's header and kept appending
+  // bubbles to the same place, so it looked like a normal ticket
+  // conversation that had lost all context, when it was actually a
+  // completely different backend session the whole time. Disable the
+  // composer for ticket chats until seeding actually completes (a
+  // freeform chat has no such race -- ITS first message is what
+  // establishes the session, so it's left enabled from the start).
+  if (!isFreeform) {
+    input.disabled = true;
+    sendBtn.disabled = true;
+    input.placeholder = 'Loading ticket…';
+  }
+
+  win.querySelector('[data-action="close"]').addEventListener('click', () => closeChat(chatId));
+  win.querySelector('[data-action="minimize"]').addEventListener('click', () => minimizeChat(chatId));
+  win.querySelector('[data-action="close-article"]').addEventListener('click', () => closeArticlePanel(chatId));
+
+  renderTray();
+}
+
+// ===========================================================================
+// Citation side-panel: shows a clicked citation's full article content
+// inside the SAME floating chat window (two-column layout), not a new
+// tab/browser -- see the .with-article CSS and article_lookup.py.
+// ===========================================================================
+const articleCache = {};  // `${page_id}::${header_path||''}` -> ArticlePayload, avoids refetching the same section
+
+async function openArticlePanel(chatId, pageId, headerPath) {
+  const chat = openChats[chatId];
+  if (!chat) return;
+  const win = chat.el;
+  win.classList.add('with-article');
+
+  const titleEl = win.querySelector('.article-panel-title');
+  const metaEl = win.querySelector('.article-panel-meta');
+  const bodyEl = win.querySelector('.article-panel-body');
+  titleEl.textContent = 'Loading…';
+  metaEl.textContent = '';
+  bodyEl.innerHTML = '<div class="article-panel-loading">Loading article…</div>';
+
+  const cacheKey = `${pageId}::${headerPath || ''}`;
+  try {
+    let article = articleCache[cacheKey];
+    if (!article) {
+      const url = `/api/articles/${encodeURIComponent(pageId)}` +
+        (headerPath ? `?header_path=${encodeURIComponent(headerPath)}` : '');
+      const res = await fetch(url);
+      if (res.status === 401) { showLoginOverlay(); return; }
+      if (res.status === 404) {
+        titleEl.textContent = 'Not available';
+        metaEl.textContent = '';
+        bodyEl.innerHTML = '<div class="article-panel-error">This article could not be found, or you don\'t have access to it.</div>';
+        return;
+      }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      article = await res.json();
+      articleCache[cacheKey] = article;
+    }
+
+    titleEl.textContent = article.title;
+    metaEl.textContent = `Page ${article.page_id} · ${article.status} · Updated ${article.last_updated}`;
+    bodyEl.innerHTML = article.html;
+
+    if (article.matched_anchor) {
+      const target = bodyEl.querySelector(`#${CSS.escape(article.matched_anchor)}`);
+      if (target) target.scrollIntoView({ block: 'start' });
+    } else {
+      bodyEl.scrollTop = 0;
+    }
+  } catch (err) {
+    titleEl.textContent = 'Error';
+    metaEl.textContent = '';
+    bodyEl.innerHTML = `<div class="article-panel-error">Could not load this article: ${err}</div>`;
+  }
+}
+
+function closeArticlePanel(chatId) {
+  const chat = openChats[chatId];
+  if (!chat) return;
+  chat.el.classList.remove('with-article');
+}
+
+function makeDraggable(win, handle) {
+  let dragging = false, startX, startY, startRight, startBottom;
+  handle.addEventListener('mousedown', (e) => {
+    dragging = true;
+    startX = e.clientX; startY = e.clientY;
+    startRight = parseFloat(win.style.right) || 16;
+    startBottom = parseFloat(win.style.bottom) || 84;
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', (e) => {
+    if (!dragging) return;
+    win.style.right = `${startRight - (e.clientX - startX)}px`;
+    win.style.bottom = `${startBottom - (e.clientY - startY)}px`;
+  });
+  document.addEventListener('mouseup', () => { dragging = false; });
+}
+
+function minimizeChat(chatId) {
+  const chat = openChats[chatId];
+  if (!chat) return;
+  chat.minimized = true;
+  chat.el.style.display = 'none';
+  renderTray();
+}
+
+function expandChat(chatId) {
+  const chat = openChats[chatId];
+  if (!chat) return;
+  chat.minimized = false;
+  chat.hasUnread = false;
+  chat.el.style.display = 'flex';
+  renderTray();
+}
+
+function closeChat(chatId) {
+  const chat = openChats[chatId];
+  if (!chat) return;
+  chat.el.remove();
+  delete openChats[chatId];
+  renderTray();
+}
+
+function renderTray() {
+  chatTray.innerHTML = '';
+  const tabsWrap = document.createElement('div');
+  tabsWrap.className = 'tray-tabs';
+
+  Object.entries(openChats).forEach(([chatId, chat]) => {
+    const tab = document.createElement('div');
+    tab.className = 'tray-tab' + (chat.isFreeform ? ' freeform' : '') + (chat.hasUnread ? ' has-unread' : '');
+    tab.innerHTML = `<span>${chat.ticketKey ? chat.ticketKey.split('-')[1]?.slice(0, 3) : 'chat'}</span>` +
+      '<span class="unread-dot"></span><span class="close-x">&times;</span>';
+    tab.title = chat.ticketKey ? `${chat.ticketKey}: ${chat.title}` : chat.title;
+    tab.addEventListener('click', (e) => {
+      if (e.target.classList.contains('close-x')) { closeChat(chatId); return; }
+      chat.minimized ? expandChat(chatId) : minimizeChat(chatId);
+    });
+    tabsWrap.appendChild(tab);
+  });
+
+  const newChatTab = document.createElement('div');
+  newChatTab.className = 'tray-tab freeform';
+  newChatTab.textContent = '+';
+  newChatTab.title = 'New chat';
+  newChatTab.addEventListener('click', openNewFreeformChat);
+  tabsWrap.appendChild(newChatTab);
+
+  chatTray.appendChild(tabsWrap);
+}
+
+// ===========================================================================
+// Chat rendering (operates on a SPECIFIC chat window's DOM, not a global one)
+// ===========================================================================
+function chatInnerOf(chatId) { return openChats[chatId].el.querySelector('.chat-inner'); }
+function scrollChatToBottom(chatId) {
+  const scrollEl = openChats[chatId].el.querySelector('.chat-scroll');
+  scrollEl.scrollTop = scrollEl.scrollHeight;
+}
+
+function clearEmptyState(chatId) {
+  const inner = chatInnerOf(chatId);
+  const empty = inner.querySelector('.empty-state');
+  if (empty) empty.remove();
+}
+
+function addUserBubble(chatId, text) {
+  clearEmptyState(chatId);
+  const row = document.createElement('div');
+  row.className = 'msg-row user';
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.textContent = text;
+  row.appendChild(bubble);
+  chatInnerOf(chatId).appendChild(row);
+  scrollChatToBottom(chatId);
+}
+
+function addThinkingBubble(chatId) {
+  const row = document.createElement('div');
+  row.className = 'msg-row assistant';
+  row.dataset.thinking = 'true';
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble thinking';
+  bubble.textContent = 'Thinking...';
+  row.appendChild(bubble);
+  chatInnerOf(chatId).appendChild(row);
+  scrollChatToBottom(chatId);
+}
+
+function removeThinkingBubble(chatId) {
+  const row = chatInnerOf(chatId).querySelector('[data-thinking="true"]');
+  if (row) row.remove();
+}
+
+function addAssistantTurn(chatId, turn) {
+  const { row, textDiv } = addAssistantTurnShell(chatId, turn);
+  textDiv.textContent = turn.answer_text || '';
+  finishAssistantTurn(chatId, row, turn);
+  return row;
+}
+
+function addAssistantTurnShell(chatId, turn) {
+  clearEmptyState(chatId);
+  const row = document.createElement('div');
+  row.className = 'msg-row assistant';
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+
+  let badges = '';
+  if (turn.mode === 'candidates_only') badges += '<span class="badge candidates">Candidates only</span>';
+  if (turn.low_confidence) badges += '<span class="badge low-confidence">Low confidence</span>';
+  if (badges) {
+    const badgeDiv = document.createElement('div');
+    badgeDiv.innerHTML = badges;
+    badgeDiv.style.marginBottom = '5px';
+    bubble.appendChild(badgeDiv);
+  }
+
+  const textDiv = document.createElement('div');
+  bubble.appendChild(textDiv);
+  row.appendChild(bubble);
+  chatInnerOf(chatId).appendChild(row);
+  scrollChatToBottom(chatId);
+  return { row, bubble, textDiv };
+}
+
+function finishAssistantTurn(chatId, row, turn) {
+  const bubble = row.querySelector('.bubble');
+
+  if (turn.caveat) {
+    const caveatBox = document.createElement('div');
+    caveatBox.className = 'caveat-box';
+    caveatBox.textContent = turn.caveat;
+    bubble.appendChild(caveatBox);
+  }
+
+  if (turn.superseded_alternatives && turn.superseded_alternatives.length) {
+    turn.superseded_alternatives.forEach(alt => {
+      const altBox = document.createElement('div');
+      altBox.className = 'alt-box';
+      altBox.innerHTML = '<div class="alt-title">Older version also exists</div>' +
+        `${alt.older_title} (page ${alt.older_page_id}, updated ${alt.older_last_updated}) — ` +
+        `superseded by the current version above (updated ${alt.current_last_updated}).`;
+      bubble.appendChild(altBox);
+    });
+  }
+
+  if (turn.citations && turn.citations.length) {
+    // Clickable chips (structured data) replace the flat staleness text
+    // when available -- each one opens the matched article section
+    // side-by-side in this same chat window. See openArticlePanel().
+    const chipsDiv = document.createElement('div');
+    chipsDiv.className = 'citation-chips';
+    turn.citations.forEach(c => {
+      const chip = document.createElement('span');
+      chip.className = 'citation-chip' + (c.status !== 'current' ? ' stale' : '');
+      chip.innerHTML = `<span class="status-dot"></span>${c.title}`;
+      chip.title = `Updated ${c.last_updated} · ${c.status}`;
+      chip.addEventListener('click', () => openArticlePanel(chatId, c.page_id, c.header_path));
+      chipsDiv.appendChild(chip);
+    });
+    bubble.appendChild(chipsDiv);
+  } else if (turn.staleness_disclosure) {
+    const stale = document.createElement('div');
+    stale.className = 'staleness';
+    stale.textContent = turn.staleness_disclosure;
+    bubble.appendChild(stale);
+  }
+
+  scrollChatToBottom(chatId);
+  if (openChats[chatId] && openChats[chatId].minimized) {
+    openChats[chatId].hasUnread = true;
+    renderTray();
+  }
+}
+
+// ===========================================================================
+// Sending / seeding / replaying
+// ===========================================================================
+async function sendMessageInChat(chatId) {
+  const chat = openChats[chatId];
+  if (!chat) return;
+  const input = chat.el.querySelector('.composer-input');
+  const sendBtn = chat.el.querySelector('.send-btn');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  input.style.height = 'auto';
+  sendBtn.disabled = true;
+
+  addUserBubble(chatId, text);
+  addThinkingBubble(chatId);
+
+  const shells = {};
+  let removedThinking = false;
+
+  try {
+    const res = await fetch('/api/messages/stream', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session_id: chat.sessionId, message: text }),
+    });
+    if (res.status === 401) { removeThinkingBubble(chatId); showLoginOverlay(); return; }
+    if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
+
+    await readSSE(res, (eventName, data) => {
+      if (eventName === 'meta') {
+        chat.sessionId = data.session_id;
+        if (data.stopped_at === 'declined') {
+          // Server-generated direct reply (step_route_or_search.py --
+          // one reasoning call decided not to search, e.g. a greeting,
+          // identity question, or off-topic message) -- not hardcoded
+          // here, the message is context-aware.
+          removeThinkingBubble(chatId); removedThinking = true;
+          addAssistantTurn(chatId, { answer_text: data.message || "Let me know what you'd like help with on this ticket.", mode: null });
+        } else if (data.stopped_at === 'error') {
+          removeThinkingBubble(chatId); removedThinking = true;
+          addAssistantTurn(chatId, { answer_text: data.error_message || 'The assistant is temporarily unavailable. Please try again.', mode: null });
+        }
+      } else if (eventName === 'turn_start') {
+        if (!removedThinking) { removeThinkingBubble(chatId); removedThinking = true; }
+        const shell = addAssistantTurnShell(chatId, data.turn);
+        shells[data.turn_index] = { ...shell, turn: data.turn, text: '' };
+      } else if (eventName === 'turn_delta') {
+        const s = shells[data.turn_index];
+        if (!s) return;
+        s.text += data.delta;
+        s.textDiv.textContent = s.text;
+        scrollChatToBottom(chatId);
+      } else if (eventName === 'turn_end') {
+        const s = shells[data.turn_index];
+        if (!s) return;
+        // data.turn (citations/caveat/staleness/superseded_alternatives)
+        // is only present here for a synthesized answer -- those fields
+        // aren't known until the full text has streamed (see
+        // chat_service.py's stream_message()). Merge over the earlier
+        // turn_start payload rather than replace it, since turn_start
+        // still carries sub_query/mode/low_confidence.
+        const finalTurn = data.turn ? { ...s.turn, ...data.turn } : s.turn;
+        finishAssistantTurn(chatId, s.row, { ...finalTurn, answer_text: s.text });
+      }
+    });
+    loadMonitoring();
+  } catch (err) {
+    if (!removedThinking) removeThinkingBubble(chatId);
+    addAssistantTurn(chatId, { answer_text: 'Error contacting the assistant: ' + err, mode: null });
+  } finally {
+    sendBtn.disabled = false;
+  }
+}
+
+function enableComposer(chatId) {
+  const chat = openChats[chatId];
+  if (!chat) return;
+  const input = chat.el.querySelector('.composer-input');
+  const sendBtn = chat.el.querySelector('.send-btn');
+  input.disabled = false;
+  sendBtn.disabled = false;
+  input.placeholder = 'Message the assistant...';
+}
+
+async function replayTicketSession(chatId, issueKey, sessionNumber = 1) {
+  const res = await fetch(`/api/tickets/${issueKey}/session?session_number=${sessionNumber}`);
+  const turns = res.ok ? await res.json() : [];
+  clearEmptyState(chatId);
+  turns.forEach(t => {
+    addUserBubble(chatId, t.raw_text);
+    if (t.stopped_at === 'ok') {
+      addAssistantTurn(chatId, {
+        answer_text: t.answer_text, caveat: t.caveat, mode: t.mode,
+        low_confidence: !!t.low_confidence, superseded_alternatives: [],
+        staleness_disclosure: '', citations: t.citations || [],
+      });
+    } else if (t.stopped_at === 'declined') {
+      addAssistantTurn(chatId, { answer_text: t.answer_text, mode: null });
+    }
+  });
+  enableComposer(chatId);
+}
+
+async function seedTicketSession(chatId, issueKey, ticketSummary, sessionNumber = 1) {
+  const chat = openChats[chatId];
+  addUserBubble(chatId, `Ticket ${issueKey}: ${ticketSummary}`);
+  addThinkingBubble(chatId);
+
+  const shells = {};
+  let removedThinking = false;
+  try {
+    const res = await fetch(`/api/tickets/${issueKey}/open/stream?session_number=${sessionNumber}`, { method: 'POST' });
+    if (res.status === 401) { removeThinkingBubble(chatId); showLoginOverlay(); return; }
+    if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
+
+    await readSSE(res, (eventName, data) => {
+      if (eventName === 'meta') {
+        chat.sessionId = data.session_id;
+      } else if (eventName === 'turn_start') {
+        if (!removedThinking) { removeThinkingBubble(chatId); removedThinking = true; }
+        const shell = addAssistantTurnShell(chatId, data.turn);
+        shells[data.turn_index] = { ...shell, turn: data.turn, text: '' };
+      } else if (eventName === 'turn_delta') {
+        const s = shells[data.turn_index];
+        if (!s) return;
+        s.text += data.delta;
+        s.textDiv.textContent = s.text;
+        scrollChatToBottom(chatId);
+      } else if (eventName === 'turn_end') {
+        const s = shells[data.turn_index];
+        if (!s) return;
+        // See the typed-message handler's identical comment above --
+        // data.turn carries citations/caveat/staleness only for a
+        // synthesized answer, merged over the turn_start payload.
+        const finalTurn = data.turn ? { ...s.turn, ...data.turn } : s.turn;
+        finishAssistantTurn(chatId, s.row, { ...finalTurn, answer_text: s.text });
+      }
+    });
+    loadMonitoring();
+  } catch (err) {
+    if (!removedThinking) removeThinkingBubble(chatId);
+    addAssistantTurn(chatId, { answer_text: 'Error opening ticket: ' + err, mode: null });
+  } finally {
+    enableComposer(chatId);
+  }
+}
+
+// ===========================================================================
+// Monitoring summary (sidebar footer)
+// ===========================================================================
+async function loadMonitoring() {
+  const res = await fetch('/api/monitoring');
+  if (!res.ok) return;
+  const m = await res.json();
+  const el = document.getElementById('monitoring-summary');
+  if (!m.total_turns) { el.textContent = 'No turns logged yet.'; return; }
+  el.textContent = `${m.total_turns} turns logged · ${(m.low_confidence_rate*100).toFixed(0)}% low-confidence · ${(m.knowledge_gap_rate*100).toFixed(0)}% knowledge gaps`;
+}
+
+// ===========================================================================
+// Login gating
+// ===========================================================================
+const loginOverlay = document.getElementById('login-overlay');
+const loginError = document.getElementById('login-error');
+
+function showLoginOverlay() { loginOverlay.style.display = 'flex'; }
+
+function renderStaffIdentity(me) {
+  const el = document.getElementById('staff-identity');
+  el.innerHTML = '';
+  const label = me.is_guest ? `${me.display_name} (demo persona)` : `${me.display_name} (${me.allowed_groups.join(', ')})`;
+  el.append(label);
+  const btn = document.createElement('button');
+  btn.textContent = 'Sign out';
+  btn.onclick = doLogout;
+  el.appendChild(btn);
+}
+
+// ===========================================================================
+// Persona picker -- public-demo entry point (2026-10-25): no password,
+// each click creates a brand-new isolated guest account server-side (see
+// auth.guest_login()), so every visitor gets their own empty slate
+// regardless of which persona they pick, and never sees anyone else's
+// (or the real account owner's) chat history or tickets.
+// ===========================================================================
+async function loadPersonas() {
+  const grid = document.getElementById('persona-grid');
+  try {
+    const res = await fetch('/api/personas');
+    const personas = await res.json();
+    grid.innerHTML = '';
+    personas.forEach(p => {
+      const card = document.createElement('button');
+      card.className = 'persona-card';
+      card.innerHTML = `<div class="persona-name">${p.display_name}</div>` +
+        `<div class="persona-role">${p.role}</div>` +
+        `<div class="persona-access">Access: <strong>${p.allowed_groups.map(g => g.replace('-group', '').replace(/-/g, ' ')).join(', ')}</strong></div>`;
+      card.addEventListener('click', () => doGuestLogin(p.persona, card));
+      grid.appendChild(card);
+    });
+  } catch (err) {
+    grid.innerHTML = `<div class="empty-note">Could not load demo personas: ${err}</div>`;
+  }
+}
+
+async function doGuestLogin(persona, cardEl) {
+  document.querySelectorAll('.persona-card').forEach(c => c.disabled = true);
+  if (cardEl) cardEl.textContent = 'Signing in...';
+  try {
+    const res = await fetch('/api/login/guest', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ persona }),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      loginError.textContent = body.detail || 'Could not start the demo.';
+      document.querySelectorAll('.persona-card').forEach(c => c.disabled = false);
+      return;
+    }
+    const me = await res.json();
+    loginOverlay.style.display = 'none';
+    document.getElementById('guest-banner').style.display = 'block';
+    renderStaffIdentity(me);
+    initApp();
+  } catch (err) {
+    loginError.textContent = 'Could not reach the server.';
+    document.querySelectorAll('.persona-card').forEach(c => c.disabled = false);
+  }
+}
+
+async function doLogin() {
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value;
+  loginError.textContent = '';
+  try {
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      loginError.textContent = body.detail || 'Login failed.';
+      return;
+    }
+    const me = await res.json();
+    loginOverlay.style.display = 'none';
+    renderStaffIdentity(me);
+    initApp();
+  } catch (err) {
+    loginError.textContent = 'Could not reach the server.';
+  }
+}
+
+async function doLogout() {
+  await fetch('/api/logout', { method: 'POST' });
+  location.reload();
+}
+
+document.getElementById('login-btn').addEventListener('click', doLogin);
+document.getElementById('login-password').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') doLogin();
+});
+
+function initApp() {
+  loadTickets();
+  loadMonitoring();
+  renderTray();
+}
+
+(async function checkLoginOnLoad() {
+  const res = await fetch('/api/me');
+  const me = await res.json();
+  if (me.logged_in) {
+    if (me.is_guest) document.getElementById('guest-banner').style.display = 'block';
+    renderStaffIdentity(me);
+    initApp();
+  } else {
+    loadPersonas();
+    showLoginOverlay();
+  }
+})();
+</script>
+</body>
+</html>

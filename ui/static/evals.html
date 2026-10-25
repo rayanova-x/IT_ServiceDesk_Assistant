@@ -1,0 +1,1265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evals &amp; Monitoring</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+  :root {
+    --canvas: #F7F5EE;
+    --surface: #FFFFFF;
+    --surface-alt: #E4F1E6;
+    --surface-sunken: #F4F2EA;
+    --ink: #161616;
+    --ink-muted: rgba(22,22,22,0.62);
+    --ink-subtle: rgba(22,22,22,0.45);
+    --accent: #9BCBA8;
+    --accent-ink: #161616;
+    --border: #161616;
+    --border-w: 2px;
+    --radius: 12px;
+    --radius-chip: 8px;
+    --shadow: 4px 4px 0 0 var(--border);
+    --shadow-lg: 6px 6px 0 0 var(--border);
+    --good: #1a7a4c;
+    --good-soft: #dff3e6;
+    --warn: #8a5a00;
+    --warn-soft: #fff1cf;
+    --bad: #a3242a;
+    --bad-soft: #fbdede;
+    --sidebar-bg: #161616;
+    --sidebar-fg: #f4f2ea;
+    --sidebar-hover: #262626;
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--canvas); color: var(--ink); height: 100vh; overflow: hidden;
+  }
+  .app { display: flex; height: 100vh; }
+
+  /* Side tabs */
+  .sidebar {
+    width: 220px; background: var(--sidebar-bg); color: var(--sidebar-fg);
+    display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto;
+    border-right: var(--border-w) solid var(--border);
+  }
+  .sidebar-header { padding: 20px 18px 4px; font-weight: 700; font-size: 15px; letter-spacing: -0.01em; }
+  .sidebar-back { padding: 0 18px 16px; }
+  .sidebar-back a { color: rgba(244,242,234,0.55); font-size: 11.5px; text-decoration: none; letter-spacing: 0.02em; }
+  .sidebar-back a:hover { color: var(--accent); }
+  .tab-item {
+    display: flex; align-items: center; gap: 10px; padding: 11px 18px; cursor: pointer;
+    font-size: 13px; font-weight: 500; border-left: 3px solid transparent; transition: background 0.15s var(--ease);
+  }
+  .tab-item:hover { background: var(--sidebar-hover); }
+  .tab-item.active { background: var(--sidebar-hover); border-left-color: var(--accent); font-weight: 700; }
+  .tab-icon { width: 16px; text-align: center; flex-shrink: 0; opacity: 0.8; }
+  .sidebar-help { margin-top: auto; padding: 14px 18px; border-top: 1px solid rgba(244,242,234,0.12); }
+  .sidebar-help a { color: rgba(244,242,234,0.55); font-size: 11.5px; text-decoration: none; }
+  .sidebar-help a:hover { color: var(--accent); }
+
+  .main { flex: 1; overflow-y: auto; min-width: 0; }
+  .page { max-width: 1080px; margin: 0 auto; padding: 36px 28px 64px; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  h1 { font-size: 26px; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .subtitle { color: var(--ink-muted); font-size: 13px; margin: 0 0 28px; max-width: 680px; line-height: 1.55; }
+
+  .section-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-subtle); margin: 36px 0 12px; padding-bottom: 6px; border-bottom: 1px solid rgba(22,22,22,0.12);
+  }
+  .section-label:first-of-type { margin-top: 0; }
+  .section-note { font-size: 12px; color: var(--ink-muted); margin: -6px 0 16px; max-width: 640px; line-height: 1.55; }
+
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; }
+  .card {
+    background: var(--surface); border: var(--border-w) solid var(--border); border-radius: var(--radius);
+    padding: 14px 16px; box-shadow: var(--shadow);
+  }
+  .card .label { font-size: 11px; color: var(--ink-muted); margin-bottom: 6px; font-weight: 500; letter-spacing: 0.02em; }
+  .card .value { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .card .value.good { color: var(--good); }
+  .card .value.warn { color: var(--warn); }
+  .card .value.bad { color: var(--bad); }
+  .card .sub { font-size: 11px; color: var(--ink-muted); margin-top: 4px; }
+  .card .provenance { font-size: 10px; color: var(--ink-subtle); margin-top: 6px; font-family: monospace; }
+
+  .panel {
+    background: var(--surface); border: var(--border-w) solid var(--border); border-radius: var(--radius);
+    padding: 18px 20px; box-shadow: var(--shadow);
+  }
+  .panel + .panel { margin-top: 16px; }
+  .panel h2 { font-size: 14px; font-weight: 700; margin: 0 0 12px; }
+
+  .empty-note { color: var(--ink-muted); font-size: 13px; padding: 24px 0; text-align: center; }
+  .stale-note { font-size: 11px; color: var(--ink-subtle); margin-top: 10px; font-family: monospace; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th, td { text-align: left; padding: 8px 8px; border-bottom: 1px solid rgba(22,22,22,0.1); }
+  th { color: var(--ink-subtle); font-weight: 600; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.04em; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td.good { color: var(--good); font-weight: 700; }
+  td.warn { color: var(--warn); font-weight: 700; }
+  td.bad { color: var(--bad); font-weight: 700; }
+
+  .threshold-marker { font-size: 11px; color: var(--ink-muted); margin: 6px 0 14px; font-family: monospace; }
+
+  .num-section { padding-top: 24px; border-top: 1px solid rgba(22,22,22,0.12); }
+  .num-section:first-of-type { padding-top: 0; border-top: none; }
+  .num-col-head { margin-bottom: 14px; }
+  .num-col-title { display: block; font-size: 16px; font-weight: 700; }
+  .num-col-sub { display: block; font-size: 11.5px; color: var(--ink-muted); margin-top: 2px; }
+  .num-subsection {
+    display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600;
+    color: var(--ink-muted); cursor: pointer; margin: 20px 0 0; padding: 4px 0;
+  }
+  .num-subsection:hover { color: var(--ink); }
+  .num-subsection-body { display: none; margin-top: 10px; max-width: 640px; }
+  .num-subsection-body.open { display: block; }
+  .num-subsection.open .gs-chevron { transform: rotate(90deg); }
+
+  .honest-flag {
+    background: var(--warn-soft); border: var(--border-w) solid var(--border); border-radius: var(--radius-chip);
+    padding: 10px 14px; font-size: 12.5px; margin-bottom: 14px; color: var(--warn); box-shadow: var(--shadow);
+  }
+
+  /* Golden set browser */
+  .gs-group { margin-bottom: 10px; }
+  .gs-group-header {
+    display: flex; align-items: center; justify-content: space-between; cursor: pointer;
+    padding: 13px 16px; background: var(--surface); border: var(--border-w) solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow); transition: transform 0.12s var(--ease);
+  }
+  .gs-group-header:hover { background: var(--surface-alt); }
+  .gs-group-title { font-size: 13.5px; font-weight: 700; }
+  .gs-group-sub { font-size: 11.5px; color: var(--ink-muted); margin-top: 2px; font-weight: 400; }
+  .gs-group-count { font-size: 11.5px; color: var(--ink-muted); flex-shrink: 0; margin-left: 12px; font-family: monospace; }
+  .gs-group-cases { display: none; padding: 10px 2px 2px; }
+  .gs-group.expanded .gs-group-cases { display: block; }
+  .gs-group.expanded .gs-chevron { transform: rotate(90deg); }
+  .gs-chevron { display: inline-block; transition: transform 0.15s var(--ease); margin-right: 8px; color: var(--ink-muted); }
+
+  .gs-case {
+    background: var(--surface); border: 1px solid rgba(22,22,22,0.18); border-radius: var(--radius-chip);
+    padding: 12px 14px; margin-bottom: 8px; font-size: 12.5px;
+  }
+  .gs-case-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+  .gs-case-id { font-weight: 700; font-family: monospace; font-size: 11.5px; }
+  .gs-subtype { font-size: 10px; color: var(--ink-muted); background: var(--surface-sunken); border-radius: 6px; padding: 2px 7px; font-weight: 500; letter-spacing: 0.02em; text-transform: uppercase; }
+  .gs-badge { font-size: 10px; border-radius: 6px; padding: 2px 7px; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; }
+  .gs-badge.pass { background: var(--good-soft); color: var(--good); }
+  .gs-badge.fail { background: var(--bad-soft); color: var(--bad); }
+  .gs-badge.unanswerable { background: #ece9fb; color: #5b4fc4; }
+  .gs-badge.untested { background: var(--surface-sunken); color: var(--ink-muted); }
+  .gs-query { white-space: pre-wrap; background: var(--surface-sunken); border: 1px solid rgba(22,22,22,0.1); border-radius: 7px; padding: 8px 10px; margin: 6px 0; font-size: 12px; }
+  .gs-meta { font-size: 11.5px; color: var(--ink-muted); }
+  .gs-notes { font-size: 11.5px; color: var(--ink-muted); font-style: italic; margin-top: 4px; }
+
+  /* Run a Test Case tab */
+  .rc-form label { display: block; font-size: 12.5px; font-weight: 700; margin: 16px 0 6px; }
+  .rc-form label:first-child { margin-top: 0; }
+  .rc-form textarea, .rc-form input[type="text"] {
+    width: 100%; border: var(--border-w) solid var(--border); border-radius: 8px; padding: 10px 12px;
+    font-size: 13px; font-family: inherit; resize: vertical; background: var(--surface);
+  }
+  .rc-form textarea:focus, .rc-form input[type="text"]:focus { outline: none; box-shadow: 0 0 0 3px rgba(155,203,168,0.5); }
+  .rc-form .hint { font-size: 11.5px; color: var(--ink-muted); margin-top: 4px; }
+  .rc-checkbox-row { display: flex; align-items: center; gap: 8px; margin: 16px 0; }
+  .rc-checkbox-row input { margin: 0; width: 16px; height: 16px; accent-color: var(--ink); }
+  .rc-checkbox-row label { margin: 0; font-weight: 400; font-size: 12.5px; }
+
+  .rc-picker-results { max-height: 220px; overflow-y: auto; border: var(--border-w) solid var(--border); border-radius: 8px; margin-top: 6px; background: var(--surface); }
+  .rc-picker-row { padding: 8px 11px; font-size: 12.5px; cursor: pointer; border-bottom: 1px solid rgba(22,22,22,0.1); display: flex; justify-content: space-between; gap: 8px; }
+  .rc-picker-row:last-child { border-bottom: none; }
+  .rc-picker-row:hover { background: var(--surface-alt); }
+  .rc-picker-row.selected { background: var(--accent); }
+  .rc-picker-title { flex: 1; }
+  .rc-picker-meta { color: var(--ink-muted); font-size: 11px; flex-shrink: 0; }
+  .rc-selected-page {
+    background: var(--surface-alt); border: var(--border-w) solid var(--border); border-radius: 8px;
+    padding: 8px 11px; font-size: 12.5px; margin-top: 6px; display: flex; justify-content: space-between; align-items: center;
+  }
+  .rc-selected-page button { background: none; border: none; color: var(--ink); cursor: pointer; font-size: 12px; font-weight: 700; text-decoration: underline; }
+
+  .rc-run-btn {
+    background: var(--accent); color: var(--accent-ink); border: var(--border-w) solid var(--border); border-radius: 8px;
+    padding: 11px 20px; font-size: 13.5px; font-weight: 700; cursor: pointer; margin-top: 20px;
+    box-shadow: var(--shadow); transition: transform 0.12s var(--ease), box-shadow 0.12s var(--ease);
+  }
+  .rc-run-btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 0 var(--border); }
+  .rc-run-btn:disabled { background: #e8e4d4; color: var(--ink-subtle); cursor: default; transform: none; box-shadow: var(--shadow); }
+
+  .rc-result { margin-top: 22px; }
+  .rc-result-badge { font-size: 13px; font-weight: 700; padding: 9px 16px; border-radius: 8px; display: inline-block; margin-bottom: 10px; border: var(--border-w) solid var(--border); box-shadow: var(--shadow); }
+  .rc-result-badge.pass { background: var(--good-soft); color: var(--good); }
+  .rc-result-badge.fail { background: var(--bad-soft); color: var(--bad); }
+  .rc-result-badge.neutral { background: var(--surface-sunken); color: var(--ink-muted); }
+  .rc-retrieved-list { list-style: none; margin: 8px 0 0; padding: 0; }
+  .rc-retrieved-list li { padding: 7px 10px; border-bottom: 1px solid rgba(22,22,22,0.1); font-size: 12.5px; display: flex; justify-content: space-between; }
+  .rc-retrieved-list li.is-expected { background: var(--surface-alt); font-weight: 700; }
+
+  .rc-custom-list-item {
+    background: var(--surface); border: 1px solid rgba(22,22,22,0.18); border-radius: var(--radius-chip);
+    padding: 10px 14px; margin-bottom: 8px; font-size: 12.5px;
+  }
+
+  /* My Conversations tab */
+  .conv-layout { display: flex; gap: 16px; align-items: flex-start; }
+  .conv-session-list { width: 280px; flex-shrink: 0; max-height: 70vh; overflow-y: auto; border: var(--border-w) solid var(--border); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); }
+  .conv-session-row { padding: 10px 12px; border-bottom: 1px solid rgba(22,22,22,0.1); cursor: pointer; font-size: 12.5px; }
+  .conv-session-row:last-child { border-bottom: none; }
+  .conv-session-row:hover { background: var(--surface-alt); }
+  .conv-session-row.selected { background: var(--accent); }
+  .conv-session-id { font-weight: 700; font-family: monospace; font-size: 11.5px; }
+  .conv-session-meta { color: var(--ink-muted); font-size: 11px; margin-top: 2px; }
+
+  .conv-turns { flex: 1; min-width: 0; }
+  .conv-turn {
+    background: var(--surface); border: 1px solid rgba(22,22,22,0.18); border-radius: var(--radius-chip);
+    padding: 12px 14px; margin-bottom: 8px; font-size: 12.5px;
+  }
+  .conv-turn-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+  .conv-turn-idx { font-family: monospace; font-size: 11.5px; color: var(--ink-muted); }
+  .conv-turn-text { white-space: pre-wrap; background: var(--surface-sunken); border: 1px solid rgba(22,22,22,0.1); border-radius: 7px; padding: 8px 10px; font-size: 12px; margin-bottom: 6px; }
+  .conv-mark-btn {
+    background: var(--surface); border: var(--border-w) solid var(--border); color: var(--ink); border-radius: 7px;
+    padding: 5px 11px; font-size: 11.5px; font-weight: 700; cursor: pointer;
+  }
+  .conv-mark-btn:hover { background: var(--accent); }
+  .conv-mark-btn:disabled { opacity: 0.5; cursor: default; }
+  .conv-marked-badge { font-size: 10px; border-radius: 6px; padding: 2px 7px; font-weight: 700; background: var(--good-soft); color: var(--good); letter-spacing: 0.02em; text-transform: uppercase; }
+
+  .conv-mark-form {
+    display: none; margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(22,22,22,0.2);
+  }
+  .conv-mark-form.open { display: block; }
+
+  .guide {
+    background: var(--surface-alt); border: var(--border-w) solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 16px 18px; margin-bottom: 28px; position: relative;
+  }
+  .guide-close {
+    position: absolute; top: 10px; right: 12px; background: none; border: none; cursor: pointer;
+    font-size: 15px; font-weight: 700; color: var(--ink-muted); line-height: 1; padding: 2px 6px;
+  }
+  .guide-close:hover { color: var(--ink); }
+  .guide h2 { font-size: 13px; font-weight: 700; margin: 0 0 10px; letter-spacing: -0.01em; }
+  .guide-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .guide-step { padding-right: 10px; }
+  .guide-step .num {
+    display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px;
+    background: var(--ink); color: var(--surface-alt); border-radius: 50%; font-size: 11px; font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .guide-step .title { font-size: 12.5px; font-weight: 700; display: block; margin-bottom: 3px; }
+  .guide-step .desc { font-size: 11.5px; color: var(--ink-muted); line-height: 1.5; }
+  @media (max-width: 760px) { .guide-steps { grid-template-columns: 1fr; } }
+
+  .tab-count {
+    background: var(--accent); color: var(--accent-ink); font-size: 10px; font-weight: 700;
+    border-radius: 9px; padding: 1px 6px; margin-left: 6px;
+  }
+
+  .rq-case {
+    background: var(--surface); border: 1px solid rgba(22,22,22,0.18); border-radius: var(--radius-chip);
+    padding: 12px 14px; margin-bottom: 8px; font-size: 12.5px;
+  }
+  .rq-case.decided { opacity: 0.55; }
+  .rq-case-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; justify-content: space-between; }
+  .rq-case-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .rq-case-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .rq-decide-btn {
+    border: var(--border-w) solid var(--border); border-radius: 7px; padding: 5px 11px;
+    font-size: 11.5px; font-weight: 700; cursor: pointer; background: var(--surface); color: var(--ink);
+  }
+  .rq-decide-btn.approve:hover, .rq-decide-btn.approve.active { background: var(--good-soft); color: var(--good); }
+  .rq-decide-btn.reject:hover, .rq-decide-btn.reject.active { background: var(--bad-soft); color: var(--bad); }
+  .rq-result-chip { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.02em; }
+  .rq-result-chip.pass { background: var(--good-soft); color: var(--good); }
+  .rq-result-chip.fail { background: var(--bad-soft); color: var(--bad); }
+
+  .rq-finish-row { margin-top: 18px; display: flex; align-items: center; gap: 14px; }
+  .rq-finish-hint { font-size: 12px; color: var(--ink-muted); }
+
+  .gsv-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 10px 14px; border: 1px solid rgba(22,22,22,0.18); border-radius: var(--radius-chip);
+    margin-bottom: 6px; font-size: 12.5px;
+  }
+  .gsv-row.latest { border-color: var(--border); border-width: var(--border-w); background: var(--surface-alt); }
+  .gsv-version { font-weight: 700; font-family: monospace; }
+  .gsv-note { color: var(--ink-muted); font-size: 11.5px; }
+
+  .grs-ok { color: var(--good); font-weight: 700; }
+  .grs-changed { color: var(--warn); font-weight: 700; }
+
+  .grp-bar-wrap { margin-top: 12px; max-width: 420px; }
+  .grp-bar-track {
+    height: 10px; background: var(--surface-sunken); border: 1px solid rgba(22,22,22,0.15);
+    border-radius: 6px; overflow: hidden;
+  }
+  .grp-bar-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.2s var(--ease); }
+  .grp-bar-label { font-size: 11px; color: var(--ink-muted); margin-top: 4px; display: block; font-family: monospace; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <div class="sidebar-header">Evals &amp; Monitoring</div>
+    <div class="sidebar-back"><a href="/dashboard">&larr; Live dashboard</a></div>
+    <div class="tab-item active" data-tab="numbers"><span class="tab-icon">&#9646;</span> Eval Numbers</div>
+    <div class="tab-item" data-tab="golden-set"><span class="tab-icon">&#9776;</span> Golden Set</div>
+    <div class="tab-item" data-tab="run-case"><span class="tab-icon">&#9654;</span> Run a Test Case</div>
+    <div class="tab-item" data-tab="conversations"><span class="tab-icon">&#9993;</span> My Conversations</div>
+    <div class="tab-item" data-tab="review-queue"><span class="tab-icon">&#10003;</span> Review Queue<span class="tab-count" id="review-queue-count" style="display:none;"></span></div>
+    <div class="sidebar-help"><a href="#" id="guide-reopen">&#9432; How to use this page</a></div>
+  </div>
+  <div class="main">
+    <div class="page">
+
+      <div class="guide" id="page-guide">
+        <button class="guide-close" id="guide-close" title="Dismiss">&times;</button>
+        <h2>How to use this page</h2>
+        <div class="guide-steps">
+          <div class="guide-step">
+            <span class="num">1</span>
+            <span class="title">Eval Numbers</span>
+            <span class="desc">Check the scores: how well search and answer generation are doing right now.</span>
+          </div>
+          <div class="guide-step">
+            <span class="num">2</span>
+            <span class="title">Golden Set</span>
+            <span class="desc">Browse the hand-written test questions these scores are based on.</span>
+          </div>
+          <div class="guide-step">
+            <span class="num">3</span>
+            <span class="title">Run a Test Case</span>
+            <span class="desc">Try your own question and see what the pipeline retrieves for it.</span>
+          </div>
+          <div class="guide-step">
+            <span class="num">4</span>
+            <span class="title">My Conversations</span>
+            <span class="desc">Turn a real chat exchange into a new test case.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel active" id="panel-numbers">
+        <h1>Eval Numbers</h1>
+        <p class="subtitle">Offline test-set scores for the pipeline, separate from live traffic.</p>
+
+        <div class="num-section">
+          <div class="num-col-head">
+            <span class="num-col-title">Retrieval</span>
+            <span class="num-col-sub">Hybrid search + reranker · 67 golden-set cases + 50 synthetic queries</span>
+          </div>
+          <div class="rc-checkbox-row">
+            <input type="checkbox" id="retrieval-combined-toggle">
+            <label for="retrieval-combined-toggle">Include my custom test cases</label>
+          </div>
+          <div id="retrieval-eval-cards" class="card-grid"></div>
+          <div id="retrieval-eval-stale" class="stale-note"></div>
+
+          <div class="num-subsection" id="calibration-toggle">
+            <span class="gs-chevron">&#9656;</span> Confidence calibration
+          </div>
+          <div class="num-subsection-body" id="calibration-body">
+            <p class="section-note">Reranker score vs. real correctness, 112 labeled queries. Threshold: 2.0.</p>
+            <div id="calibration-buckets" class="panel"></div>
+            <div class="panel" style="margin-top:12px;">
+              <h2>By category</h2>
+              <div id="calibration-category-table"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="num-section">
+          <div class="num-col-head">
+            <span class="num-col-title">Generation</span>
+            <span class="num-col-sub">LLM-as-judge faithfulness &amp; relevance · 20 stratified queries</span>
+          </div>
+          <div id="generation-eval-honest-flag"></div>
+          <div id="generation-eval-cards" class="card-grid"></div>
+          <div id="generation-eval-stale" class="stale-note"></div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="panel-golden-set">
+        <h1>Golden Set</h1>
+        <p class="subtitle" id="golden-set-subtitle">Loading...</p>
+        <div id="golden-set-groups"></div>
+      </div>
+
+      <div class="tab-panel" id="panel-run-case">
+        <h1>Run a Test Case</h1>
+        <p class="subtitle">
+          Write a query and (optionally) pick the KB article it should retrieve, then run it
+          through the real pipeline. Results are saved separately from the hand-verified golden set.
+        </p>
+
+        <div class="rc-form">
+          <label for="rc-query">Test query</label>
+          <textarea id="rc-query" rows="3" placeholder="e.g. My SSL VPN connection keeps dropping right after I log in"></textarea>
+          <div class="hint">The exact text that would be typed into the chat, or pasted as a ticket.</div>
+
+          <div class="rc-checkbox-row">
+            <input type="checkbox" id="rc-unanswerable">
+            <label for="rc-unanswerable">This query has no correct answer in the KB (unanswerable by design)</label>
+          </div>
+
+          <div id="rc-page-picker-section">
+            <label for="rc-page-search">Expected KB article (ground truth, for scoring)</label>
+            <input type="text" id="rc-page-search" placeholder="Search article titles, e.g. &quot;VPN&quot;">
+            <div class="hint">Leave blank to skip scoring and just observe what the pipeline retrieves.</div>
+            <div id="rc-picker-results" class="rc-picker-results" style="display:none;"></div>
+            <div id="rc-selected-page" style="display:none;"></div>
+          </div>
+
+          <label for="rc-notes">Notes (optional)</label>
+          <input type="text" id="rc-notes" placeholder="Why this case, what it's checking...">
+
+          <button class="rc-run-btn" id="rc-run-btn">Run test case</button>
+        </div>
+
+        <div id="rc-result" class="rc-result"></div>
+
+        <div class="section-label" style="margin-top:40px;">Previously run custom cases</div>
+        <div id="rc-history"></div>
+      </div>
+
+      <div class="tab-panel" id="panel-conversations">
+        <h1>My Conversations</h1>
+        <p class="subtitle">
+          Real conversations logged from the live chat. Pick a session, then mark any turn as a
+          scored eval case to grow the golden set with real usage.
+        </p>
+        <div class="conv-layout">
+          <div class="conv-session-list" id="conv-session-list"></div>
+          <div class="conv-turns" id="conv-turns">
+            <div class="empty-note">Pick a session on the left to see its turns.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="panel-review-queue">
+        <h1>Review Queue</h1>
+        <p class="subtitle">
+          Production cases marked from real conversations, waiting on a human decision before they
+          can join the golden set. Approve or reject each one, then click Finish Review to promote
+          every approved case into a new golden set version.
+        </p>
+        <div id="review-queue-list"></div>
+        <div class="rq-finish-row" id="rq-finish-row" style="display:none;">
+          <button class="rc-run-btn" id="rq-finish-btn">Finish Review</button>
+          <span class="rq-finish-hint" id="rq-finish-hint"></span>
+        </div>
+
+        <div class="section-label" style="margin-top:40px;">Golden set versions</div>
+        <div id="golden-set-versions"></div>
+
+        <div class="section-label" style="margin-top:32px;">Run golden-set retrieval eval</div>
+        <p class="section-note">
+          Runs every case in the latest golden set version through the real pipeline and updates the
+          Eval Numbers tab. Skips automatically if nothing has changed since the last run.
+        </p>
+        <div id="golden-run-status" class="panel"></div>
+        <button class="rc-run-btn" id="golden-run-btn">Run Golden Eval</button>
+        <span class="rq-finish-hint" id="golden-run-result"></span>
+        <div class="grp-bar-wrap" id="golden-run-progress-wrap" style="display:none;">
+          <div class="grp-bar-track"><div class="grp-bar-fill" id="golden-run-progress-fill"></div></div>
+          <span class="grp-bar-label" id="golden-run-progress-label"></span>
+        </div>
+
+        <div class="section-label" style="margin-top:32px;">Run history</div>
+        <div id="golden-run-history"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const fmtPct = (v) => v === null || v === undefined ? '—' : `${(v * 100).toFixed(0)}%`;
+const fmtNum = (v, d = 3) => v === null || v === undefined ? '—' : v.toFixed(d);
+
+function rateClass(v, warnAt, badAt) {
+  if (v === null || v === undefined) return '';
+  if (v >= badAt) return 'bad';
+  if (v >= warnAt) return 'warn';
+  return 'good';
+}
+
+function card(label, value, cls, sub, provenance) {
+  const div = document.createElement('div');
+  div.className = 'card';
+  div.innerHTML = `<div class="label">${label}</div>` +
+    `<div class="value${cls ? ' ' + cls : ''}">${value}</div>` +
+    (sub ? `<div class="sub">${sub}</div>` : '') +
+    (provenance ? `<div class="provenance">${provenance}</div>` : '');
+  return div;
+}
+
+// ===========================================================================
+// Page guide (dismiss + remember)
+// ===========================================================================
+try {
+  if (localStorage.getItem('evals-guide-dismissed') === '1') {
+    document.getElementById('page-guide').style.display = 'none';
+  }
+} catch (err) {}
+document.getElementById('guide-close').addEventListener('click', () => {
+  document.getElementById('page-guide').style.display = 'none';
+  try { localStorage.setItem('evals-guide-dismissed', '1'); } catch (err) {}
+});
+document.getElementById('guide-reopen').addEventListener('click', (e) => {
+  e.preventDefault();
+  document.getElementById('page-guide').style.display = 'block';
+  try { localStorage.removeItem('evals-guide-dismissed'); } catch (err) {}
+});
+
+// ===========================================================================
+// Side-tab switching
+// ===========================================================================
+document.querySelectorAll('.tab-item').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(`panel-${tab.dataset.tab}`).classList.add('active');
+  });
+});
+
+// ===========================================================================
+// Eval Numbers tab
+// ===========================================================================
+async function loadRetrievalEval() {
+  const container = document.getElementById('retrieval-eval-cards');
+  const staleNote = document.getElementById('retrieval-eval-stale');
+  const combined = document.getElementById('retrieval-combined-toggle').checked;
+  container.innerHTML = '';
+  try {
+    const endpoint = combined ? '/api/monitoring/retrieval-eval-combined' : '/api/monitoring/retrieval-eval';
+    const res = await fetch(endpoint);
+    if (!res.ok) {
+      container.innerHTML = '<div class="empty-note">No retrieval eval results found -- run <code>python src/eval_retrieval.py</code> first.</div>';
+      return;
+    }
+    const m = await res.json();
+    container.appendChild(card('Recall@5', fmtPct(m.recall_at_5), rateClass(1 - m.recall_at_5, 0.15, 0.3), `n=${m.n}`));
+    container.appendChild(card('Top-1 accuracy', fmtPct(m.top_1_accuracy)));
+    container.appendChild(card('MRR', fmtNum(m.mrr)));
+    container.appendChild(card('NDCG@5', fmtNum(m.ndcg_at_5)));
+    if (m.confuser_trap_rate !== null) {
+      container.appendChild(card('Confuser-trap rate', fmtPct(m.confuser_trap_rate), rateClass(m.confuser_trap_rate, 0.3, 0.6), `n=${m.n_trap_queries}`));
+    }
+    if (combined) {
+      staleNote.textContent = `Data: retrieval_eval_results_reranked.jsonl + eval_custom_cases.jsonl (${m.n_custom_included} custom case(s) included)`;
+    } else {
+      const ts = new Date(m.generated_at);
+      staleNote.textContent = `Data: retrieval_eval_results_reranked.jsonl · Last run: ${ts.toLocaleString()}`;
+    }
+  } catch (err) {
+    container.innerHTML = `<div class="empty-note">Error loading retrieval eval: ${err}</div>`;
+  }
+}
+document.getElementById('retrieval-combined-toggle').addEventListener('change', loadRetrievalEval);
+
+document.getElementById('calibration-toggle').addEventListener('click', (e) => {
+  e.currentTarget.classList.toggle('open');
+  document.getElementById('calibration-body').classList.toggle('open');
+});
+
+async function loadCalibration() {
+  const bucketsContainer = document.getElementById('calibration-buckets');
+  const categoryContainer = document.getElementById('calibration-category-table');
+  try {
+    const res = await fetch('/api/monitoring/calibration');
+    if (!res.ok) {
+      bucketsContainer.innerHTML = '<div class="empty-note">No calibration data found -- run <code>python src/calibrate_confidence.py</code> first.</div>';
+      return;
+    }
+    const m = await res.json();
+
+    let bucketsHtml = `<h2>Score-bucket accuracy (n=${m.n_scored})</h2>` +
+      `<div class="threshold-marker">Current threshold: <strong>${m.threshold}</strong> &mdash; data: confidence_calibration.jsonl · last run ${new Date(m.generated_at).toLocaleString()}</div>` +
+      '<table><thead><tr><th>Score range</th><th class="num">n</th><th class="num">Correct</th><th class="num">Accuracy</th></tr></thead><tbody>';
+    m.buckets.forEach(b => {
+      const cls = rateClass(1 - b.accuracy, 0.3, 0.55);
+      const atThreshold = b.range_low === 2 ? ' style="border-top:2px solid var(--accent);"' : '';
+      bucketsHtml += `<tr${atThreshold}><td>[${b.range_low}, ${b.range_high})</td>` +
+        `<td class="num">${b.n}</td><td class="num">${b.correct}</td>` +
+        `<td class="num ${cls}">${fmtPct(b.accuracy)}</td></tr>`;
+    });
+    bucketsHtml += '</tbody></table>';
+    bucketsContainer.innerHTML = bucketsHtml;
+
+    if (!m.has_category_data) {
+      categoryContainer.innerHTML = '<div class="empty-note">This calibration run predates per-category tracking -- re-run <code>python src/calibrate_confidence.py</code> to populate it.</div>';
+      return;
+    }
+
+    let catHtml = '<table><thead><tr><th>Category</th><th class="num">n</th>' +
+      '<th class="num">Below 2.0 acc.</th><th class="num">At/above 2.0 acc.</th></tr></thead><tbody>';
+    m.by_category.forEach(c => {
+      const belowAcc = c.below_threshold_accuracy !== null
+        ? `${fmtPct(c.below_threshold_accuracy)} (n=${c.below_threshold_n})` : `n/a`;
+      const aboveAcc = c.at_or_above_threshold_accuracy !== null
+        ? `${fmtPct(c.at_or_above_threshold_accuracy)} (n=${c.at_or_above_threshold_n})` : `n/a`;
+      const aboveCls = c.at_or_above_threshold_accuracy !== null
+        ? rateClass(1 - c.at_or_above_threshold_accuracy, 0.25, 0.4) : '';
+      catHtml += `<tr><td>${c.category}</td><td class="num">${c.n}</td>` +
+        `<td class="num">${belowAcc}</td><td class="num ${aboveCls}">${aboveAcc}</td></tr>`;
+    });
+    catHtml += '</tbody></table>';
+    categoryContainer.innerHTML = catHtml;
+  } catch (err) {
+    bucketsContainer.innerHTML = `<div class="empty-note">Error loading calibration: ${err}</div>`;
+  }
+}
+
+async function loadGenerationEval() {
+  const container = document.getElementById('generation-eval-cards');
+  const staleNote = document.getElementById('generation-eval-stale');
+  const flagContainer = document.getElementById('generation-eval-honest-flag');
+  try {
+    const res = await fetch('/api/monitoring/generation-eval');
+    if (!res.ok) {
+      container.innerHTML = '<div class="empty-note">No generation eval results found -- run <code>python src/judge_generation_eval.py</code> first.</div>';
+      return;
+    }
+    const m = await res.json();
+
+    if (m.n_pending > 0) {
+      flagContainer.innerHTML = `<div class="honest-flag">${m.n_pending} of ${m.n_total_rows} sub-results are still pending judgment. ` +
+        `Numbers below reflect only the ${m.n_judged} judged so far &mdash; a thin sample, not a final score.</div>`;
+    }
+
+    container.appendChild(card('Judged', `${m.n_judged} / ${m.n_total_rows}`));
+    container.appendChild(card('Mean faithfulness', m.mean_faithfulness !== null ? `${m.mean_faithfulness} / 5` : '—',
+      m.mean_faithfulness !== null ? rateClass(1 - m.mean_faithfulness / 5, 0.15, 0.35) : ''));
+    container.appendChild(card('Mean relevance', m.mean_relevance !== null ? `${m.mean_relevance} / 5` : '—',
+      m.mean_relevance !== null ? rateClass(1 - m.mean_relevance / 5, 0.15, 0.35) : ''));
+    container.appendChild(card('Contract violations', m.contract_violations,
+      m.contract_violations > 0 ? 'bad' : 'good'));
+
+    const ts = new Date(m.generated_at);
+    staleNote.textContent = `Data: generation_eval_judged.jsonl · Last run: ${ts.toLocaleString()}`;
+  } catch (err) {
+    container.innerHTML = `<div class="empty-note">Error loading generation eval: ${err}</div>`;
+  }
+}
+
+// ===========================================================================
+// Golden Set tab
+// ===========================================================================
+function resultBadge(c) {
+  if (c.unanswerable) return '<span class="gs-badge unanswerable">Unanswerable (by design)</span>';
+  if (!c.result) return '<span class="gs-badge untested">No result on file</span>';
+  if (c.result.top_1_correct) return '<span class="gs-badge pass">Top-1 correct</span>';
+  if (c.result.recall_at_5) return '<span class="gs-badge pass">In top 5 (rank ' + c.result.hit_rank + ')</span>';
+  return '<span class="gs-badge fail">Not retrieved</span>';
+}
+
+async function loadGoldenSet() {
+  const subtitle = document.getElementById('golden-set-subtitle');
+  const container = document.getElementById('golden-set-groups');
+  try {
+    const res = await fetch('/api/monitoring/golden-set');
+    if (!res.ok) {
+      container.innerHTML = '<div class="empty-note">No golden set found.</div>';
+      return;
+    }
+    const d = await res.json();
+    subtitle.textContent = `${d.total_cases} hand-written test cases (${d.n_unanswerable} unanswerable by design), ` +
+      `grouped by the behavior each group checks. Click a group to expand.`;
+
+    d.groups.forEach(g => {
+      const groupDiv = document.createElement('div');
+      groupDiv.className = 'gs-group';
+      const header = document.createElement('div');
+      header.className = 'gs-group-header';
+      header.innerHTML = `<div><span class="gs-chevron">&#9656;</span><span class="gs-group-title">${g.letter} &mdash; ${g.label}</span></div>` +
+        `<div class="gs-group-count">${g.cases.length} cases</div>`;
+      header.addEventListener('click', () => groupDiv.classList.toggle('expanded'));
+      groupDiv.appendChild(header);
+
+      const casesDiv = document.createElement('div');
+      casesDiv.className = 'gs-group-cases';
+      g.cases.forEach(c => {
+        const caseDiv = document.createElement('div');
+        caseDiv.className = 'gs-case';
+        caseDiv.innerHTML = `
+          <div class="gs-case-top">
+            <span class="gs-case-id">${c.query_id}</span>
+            <span class="gs-subtype">${c.subtype}</span>
+            ${resultBadge(c)}
+            ${c.confuser_trap_page_id ? '<span class="gs-badge untested">Has confuser trap</span>' : ''}
+          </div>
+          <div class="gs-query">${c.query.replace(/</g, '&lt;')}</div>
+          <div class="gs-meta">Expected page: ${c.unanswerable ? '— (no correct answer exists)' : c.expected_page_id}</div>
+          ${c.notes ? `<div class="gs-notes">${c.notes}</div>` : ''}
+        `;
+        casesDiv.appendChild(caseDiv);
+      });
+      groupDiv.appendChild(casesDiv);
+      container.appendChild(groupDiv);
+    });
+  } catch (err) {
+    container.innerHTML = `<div class="empty-note">Error loading golden set: ${err}</div>`;
+  }
+}
+
+// ===========================================================================
+// Run a Test Case tab
+// ===========================================================================
+let rcSelectedPage = null; // {page_id, title}
+
+async function rcSearchPages(q) {
+  const resultsDiv = document.getElementById('rc-picker-results');
+  if (!q.trim()) { resultsDiv.style.display = 'none'; return; }
+  try {
+    const res = await fetch(`/api/kb-pages/search?q=${encodeURIComponent(q)}`);
+    const pages = await res.json();
+    if (!pages.length) {
+      resultsDiv.innerHTML = '<div class="rc-picker-row">No matching articles</div>';
+      resultsDiv.style.display = 'block';
+      return;
+    }
+    resultsDiv.innerHTML = '';
+    pages.forEach(p => {
+      const row = document.createElement('div');
+      row.className = 'rc-picker-row';
+      row.innerHTML = `<span class="rc-picker-title">${p.title}</span>` +
+        `<span class="rc-picker-meta">${p.page_id} · ${p.category || '—'} · ${p.status}</span>`;
+      row.addEventListener('click', () => {
+        rcSelectedPage = { page_id: p.page_id, title: p.title };
+        rcRenderSelectedPage();
+        resultsDiv.style.display = 'none';
+        document.getElementById('rc-page-search').value = '';
+      });
+      resultsDiv.appendChild(row);
+    });
+    resultsDiv.style.display = 'block';
+  } catch (err) {
+    resultsDiv.innerHTML = `<div class="rc-picker-row">Error: ${err}</div>`;
+    resultsDiv.style.display = 'block';
+  }
+}
+
+function rcRenderSelectedPage() {
+  const div = document.getElementById('rc-selected-page');
+  if (!rcSelectedPage) { div.style.display = 'none'; return; }
+  div.style.display = 'flex';
+  div.innerHTML = `<span>${rcSelectedPage.title} <code>(${rcSelectedPage.page_id})</code></span>` +
+    `<button id="rc-clear-page">Clear</button>`;
+  document.getElementById('rc-clear-page').addEventListener('click', () => {
+    rcSelectedPage = null;
+    rcRenderSelectedPage();
+  });
+}
+
+let rcSearchDebounce = null;
+document.getElementById('rc-page-search').addEventListener('input', (e) => {
+  clearTimeout(rcSearchDebounce);
+  rcSearchDebounce = setTimeout(() => rcSearchPages(e.target.value), 250);
+});
+
+document.getElementById('rc-unanswerable').addEventListener('change', (e) => {
+  document.getElementById('rc-page-picker-section').style.display = e.target.checked ? 'none' : 'block';
+  if (e.target.checked) { rcSelectedPage = null; rcRenderSelectedPage(); }
+});
+
+function rcRenderResult(r) {
+  const container = document.getElementById('rc-result');
+  let badgeHtml;
+  if (r.unanswerable) {
+    badgeHtml = '<div class="rc-result-badge neutral">Unanswerable case -- observation only, not scored</div>';
+  } else if (r.expected_page_id === null) {
+    badgeHtml = '<div class="rc-result-badge neutral">No ground truth given -- observation only, not scored</div>';
+  } else if (r.top_1_correct) {
+    badgeHtml = '<div class="rc-result-badge pass">Correct -- expected page ranked #1</div>';
+  } else if (r.recall_at_5) {
+    badgeHtml = `<div class="rc-result-badge pass">Found at rank ${r.hit_rank} (not #1)</div>`;
+  } else {
+    badgeHtml = '<div class="rc-result-badge fail">Expected page NOT in top 5</div>';
+  }
+
+  let metricsHtml = '';
+  if (r.recall_at_5 !== null) {
+    metricsHtml = `<div class="card-grid" style="margin-top:12px;">` +
+      `${card('Recall@5', r.recall_at_5 ? 'Yes' : 'No', r.recall_at_5 ? 'good' : 'bad').outerHTML}` +
+      `${card('MRR', fmtNum(r.mrr)).outerHTML}` +
+      `${card('NDCG@5', fmtNum(r.ndcg_at_5)).outerHTML}` +
+      `</div>`;
+  }
+
+  const retrievedHtml = '<ul class="rc-retrieved-list">' +
+    r.retrieved_page_ids.map((pid, i) =>
+      `<li class="${pid === r.expected_page_id ? 'is-expected' : ''}">` +
+      `<span>#${i + 1} &mdash; ${pid}</span>${pid === r.expected_page_id ? '<span>&#10003; expected</span>' : ''}</li>`
+    ).join('') + '</ul>';
+
+  container.innerHTML = badgeHtml + metricsHtml +
+    `<div class="panel" style="margin-top:14px;"><h2>Retrieved (top 5)</h2>${retrievedHtml}</div>`;
+}
+
+document.getElementById('rc-run-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('rc-run-btn');
+  const query = document.getElementById('rc-query').value.trim();
+  const unanswerable = document.getElementById('rc-unanswerable').checked;
+  const notes = document.getElementById('rc-notes').value.trim();
+  if (!query) { alert('Write a test query first.'); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Running...';
+  try {
+    const res = await fetch('/api/evals/custom-cases/run', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query, unanswerable,
+        expected_page_id: unanswerable ? null : (rcSelectedPage ? rcSelectedPage.page_id : null),
+        notes,
+      }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const result = await res.json();
+    rcRenderResult(result);
+    // If the Eval Numbers tab's combined toggle is already checked,
+    // refresh it so the new case's effect on the overall numbers is
+    // visible without a manual re-toggle.
+    if (document.getElementById('retrieval-combined-toggle').checked) loadRetrievalEval();
+    rcLoadHistory();
+  } catch (err) {
+    document.getElementById('rc-result').innerHTML = `<div class="empty-note">Error running test case: ${err}</div>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Run test case';
+  }
+});
+
+async function rcLoadHistory() {
+  const container = document.getElementById('rc-history');
+  try {
+    const res = await fetch('/api/evals/custom-cases');
+    const d = await res.json();
+    if (!d.cases.length) {
+      container.innerHTML = '<div class="empty-note">No custom test cases run yet.</div>';
+      return;
+    }
+    container.innerHTML = '';
+    d.cases.forEach(c => {
+      const div = document.createElement('div');
+      div.className = 'rc-custom-list-item';
+      const badge = c.unanswerable || c.expected_page_id === null
+        ? '<span class="gs-badge untested">Observation only</span>'
+        : (c.top_1_correct ? '<span class="gs-badge pass">Top-1 correct</span>'
+           : (c.recall_at_5 ? `<span class="gs-badge pass">Rank ${c.hit_rank}</span>` : '<span class="gs-badge fail">Not found</span>'));
+      div.innerHTML = `<div class="gs-case-top"><span class="gs-case-id">${c.query_id}</span>${badge}</div>` +
+        `<div class="gs-query">${c.query.replace(/</g, '&lt;')}</div>` +
+        (c.notes ? `<div class="gs-notes">${c.notes}</div>` : '') +
+        `<div class="gs-meta">${new Date(c.created_at).toLocaleString()}</div>`;
+      container.appendChild(div);
+    });
+  } catch (err) {
+    container.innerHTML = `<div class="empty-note">Error loading custom cases: ${err}</div>`;
+  }
+}
+
+// ===========================================================================
+// My Conversations tab
+// ===========================================================================
+let convMarkedTurns = new Set(); // `${session_id}::${turn_index}` already marked this page-load
+
+async function convLoadSessions() {
+  const listDiv = document.getElementById('conv-session-list');
+  try {
+    const res = await fetch('/api/sessions');
+    if (!res.ok) {
+      listDiv.innerHTML = '<div class="empty-note">Could not load sessions.</div>';
+      return;
+    }
+    const sessions = await res.json();
+    if (!sessions.length) {
+      listDiv.innerHTML = '<div class="empty-note">No conversations logged yet.</div>';
+      return;
+    }
+    listDiv.innerHTML = '';
+    sessions.forEach(s => {
+      const row = document.createElement('div');
+      row.className = 'conv-session-row';
+      const started = new Date(s.started_at).toLocaleString();
+      row.innerHTML = `<div class="conv-session-id">${s.session_id}</div>` +
+        `<div class="conv-session-meta">${s.n_turns} turn(s) · ${started}${s.closed_at ? ' · closed' : ''}</div>`;
+      row.addEventListener('click', () => {
+        document.querySelectorAll('.conv-session-row').forEach(r => r.classList.remove('selected'));
+        row.classList.add('selected');
+        convLoadTurns(s.session_id);
+      });
+      listDiv.appendChild(row);
+    });
+  } catch (err) {
+    listDiv.innerHTML = `<div class="empty-note">Error loading sessions: ${err}</div>`;
+  }
+}
+
+async function convLoadTurns(sessionId) {
+  const turnsDiv = document.getElementById('conv-turns');
+  turnsDiv.innerHTML = '<div class="empty-note">Loading...</div>';
+  try {
+    const res = await fetch(`/api/sessions/${encodeURIComponent(sessionId)}/turns`);
+    if (!res.ok) {
+      turnsDiv.innerHTML = '<div class="empty-note">Could not load this session\'s turns.</div>';
+      return;
+    }
+    const turns = await res.json();
+    turnsDiv.innerHTML = '';
+    turns.forEach(t => {
+      const div = document.createElement('div');
+      div.className = 'conv-turn';
+      const key = `${sessionId}::${t.turn_index}`;
+      const alreadyMarked = convMarkedTurns.has(key);
+      div.innerHTML = `
+        <div class="conv-turn-top">
+          <span class="conv-turn-idx">turn ${t.turn_index} &middot; ${t.stopped_at}</span>
+          ${alreadyMarked ? '<span class="conv-marked-badge">Marked as eval case</span>' :
+            (t.raw_text ? `<button class="conv-mark-btn" data-session="${sessionId}" data-turn="${t.turn_index}">Mark as eval case</button>` : '')}
+        </div>
+        <div class="conv-turn-text">${(t.raw_text || '(no text)').replace(/</g, '&lt;')}</div>
+        <div class="conv-mark-form" id="conv-mark-form-${sessionId.replace(/[^a-zA-Z0-9]/g, '_')}-${t.turn_index}"></div>
+      `;
+      turnsDiv.appendChild(div);
+    });
+    turnsDiv.querySelectorAll('.conv-mark-btn').forEach(btn => {
+      btn.addEventListener('click', () => convOpenMarkForm(btn));
+    });
+  } catch (err) {
+    turnsDiv.innerHTML = `<div class="empty-note">Error loading turns: ${err}</div>`;
+  }
+}
+
+let convSelectedPage = null;
+
+function convOpenMarkForm(btn) {
+  const sessionId = btn.dataset.session;
+  const turnIndex = btn.dataset.turn;
+  const formId = `conv-mark-form-${sessionId.replace(/[^a-zA-Z0-9]/g, '_')}-${turnIndex}`;
+  const formDiv = document.getElementById(formId);
+  const isOpen = formDiv.classList.contains('open');
+  // Close any other open form first -- one at a time, keeps convSelectedPage unambiguous.
+  document.querySelectorAll('.conv-mark-form.open').forEach(f => { f.classList.remove('open'); f.innerHTML = ''; });
+  if (isOpen) return; // was already open -- just closed it above, done.
+
+  convSelectedPage = null;
+  formDiv.innerHTML = `
+    <div class="rc-checkbox-row">
+      <input type="checkbox" class="conv-unanswerable">
+      <label>This has no correct answer in the KB</label>
+    </div>
+    <label style="display:block; font-size:12px; font-weight:600; margin:10px 0 5px;">Expected KB article</label>
+    <input type="text" class="conv-page-search" placeholder="Search article titles...">
+    <div class="rc-picker-results conv-picker-results" style="display:none;"></div>
+    <div class="rc-selected-page conv-selected-page" style="display:none;"></div>
+    <label style="display:block; font-size:12px; font-weight:600; margin:10px 0 5px;">Notes (optional)</label>
+    <input type="text" class="conv-notes" placeholder="Why this case...">
+    <button class="rc-run-btn conv-confirm-btn" style="margin-top:10px;">Confirm &amp; run</button>
+  `;
+  formDiv.classList.add('open');
+
+  const searchInput = formDiv.querySelector('.conv-page-search');
+  const resultsDiv = formDiv.querySelector('.conv-picker-results');
+  const selectedDiv = formDiv.querySelector('.conv-selected-page');
+  const unansCheckbox = formDiv.querySelector('.conv-unanswerable');
+
+  let debounceHandle = null;
+  searchInput.addEventListener('input', (e) => {
+    clearTimeout(debounceHandle);
+    debounceHandle = setTimeout(async () => {
+      const q = e.target.value.trim();
+      if (!q) { resultsDiv.style.display = 'none'; return; }
+      const res = await fetch(`/api/kb-pages/search?q=${encodeURIComponent(q)}`);
+      const pages = await res.json();
+      resultsDiv.innerHTML = pages.length
+        ? pages.map(p => `<div class="rc-picker-row" data-id="${p.page_id}" data-title="${p.title.replace(/"/g, '&quot;')}">` +
+            `<span class="rc-picker-title">${p.title}</span><span class="rc-picker-meta">${p.page_id} · ${p.status}</span></div>`).join('')
+        : '<div class="rc-picker-row">No matching articles</div>';
+      resultsDiv.style.display = 'block';
+      resultsDiv.querySelectorAll('.rc-picker-row[data-id]').forEach(row => {
+        row.addEventListener('click', () => {
+          convSelectedPage = { page_id: row.dataset.id, title: row.dataset.title };
+          selectedDiv.style.display = 'flex';
+          selectedDiv.innerHTML = `<span>${convSelectedPage.title} <code>(${convSelectedPage.page_id})</code></span><button class="conv-clear-page">Clear</button>`;
+          selectedDiv.querySelector('.conv-clear-page').addEventListener('click', () => {
+            convSelectedPage = null; selectedDiv.style.display = 'none';
+          });
+          resultsDiv.style.display = 'none';
+          searchInput.value = '';
+        });
+      });
+    }, 250);
+  });
+
+  formDiv.querySelector('.conv-confirm-btn').addEventListener('click', async () => {
+    const confirmBtn = formDiv.querySelector('.conv-confirm-btn');
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = 'Running...';
+    try {
+      const res = await fetch('/api/evals/custom-cases/from-conversation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_id: sessionId,
+          turn_index: parseInt(turnIndex, 10),
+          unanswerable: unansCheckbox.checked,
+          expected_page_id: unansCheckbox.checked ? null : (convSelectedPage ? convSelectedPage.page_id : null),
+          notes: formDiv.querySelector('.conv-notes').value.trim(),
+        }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      await res.json();
+      convMarkedTurns.add(`${sessionId}::${turnIndex}`);
+      convLoadTurns(sessionId); // re-render with the "Marked" badge
+      rcLoadHistory(); // reflect it in the Run a Test Case tab's history too
+    } catch (err) {
+      alert('Error marking this turn: ' + err);
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = 'Confirm & run';
+    }
+  });
+}
+
+// ===========================================================================
+// Review Queue tab
+// ===========================================================================
+async function loadReviewQueue() {
+  const container = document.getElementById('review-queue-list');
+  const finishRow = document.getElementById('rq-finish-row');
+  const countBadge = document.getElementById('review-queue-count');
+  try {
+    const res = await fetch('/api/evals/review-queue');
+    const d = await res.json();
+    const queue = d.queue || [];
+
+    if (queue.length) {
+      countBadge.textContent = queue.length;
+      countBadge.style.display = 'inline-block';
+    } else {
+      countBadge.style.display = 'none';
+    }
+
+    if (!queue.length) {
+      container.innerHTML = '<div class="empty-note">Nothing waiting for review. Mark a turn as an eval case from My Conversations to add one here.</div>';
+      finishRow.style.display = 'none';
+      return;
+    }
+
+    container.innerHTML = '';
+    let nApproved = 0;
+    queue.forEach(c => {
+      const status = c.review_status || 'pending';
+      if (status === 'approved') nApproved++;
+      const div = document.createElement('div');
+      div.className = 'rq-case' + (status !== 'pending' ? ' decided' : '');
+      const resultChip = c.top_1_correct
+        ? '<span class="rq-result-chip pass">Top-1 correct</span>'
+        : (c.recall_at_5 ? `<span class="rq-result-chip pass">Rank ${c.hit_rank}</span>` : '<span class="rq-result-chip fail">Not retrieved</span>');
+      div.innerHTML = `
+        <div class="rq-case-top">
+          <div class="rq-case-meta">
+            <span class="gs-case-id">${c.query_id}</span>
+            ${resultChip}
+            <span class="gs-meta">from session ${c.source_session_id || '—'}</span>
+          </div>
+          <div class="rq-case-actions">
+            <button class="rq-decide-btn approve${status === 'approved' ? ' active' : ''}" data-id="${c.query_id}" data-status="approved">Approve</button>
+            <button class="rq-decide-btn reject${status === 'rejected' ? ' active' : ''}" data-id="${c.query_id}" data-status="rejected">Reject</button>
+          </div>
+        </div>
+        <div class="gs-query">${c.query.replace(/</g, '&lt;')}</div>
+        <div class="gs-meta">Expected page: ${c.expected_page_id}</div>
+        ${c.notes ? `<div class="gs-notes">${c.notes}</div>` : ''}
+      `;
+      container.appendChild(div);
+    });
+
+    container.querySelectorAll('.rq-decide-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        await fetch('/api/evals/review-queue/decide', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query_id: btn.dataset.id, status: btn.dataset.status }),
+        });
+        loadReviewQueue();
+      });
+    });
+
+    if (nApproved > 0) {
+      finishRow.style.display = 'flex';
+      document.getElementById('rq-finish-hint').textContent = `${nApproved} approved, ready to promote`;
+    } else {
+      finishRow.style.display = 'none';
+    }
+  } catch (err) {
+    container.innerHTML = `<div class="empty-note">Error loading review queue: ${err}</div>`;
+  }
+}
+
+document.getElementById('rq-finish-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('rq-finish-btn');
+  btn.disabled = true;
+  btn.textContent = 'Promoting...';
+  try {
+    const res = await fetch('/api/evals/review-queue/finish', { method: 'POST' });
+    if (!res.ok) { const d = await res.json(); throw new Error(d.detail || `HTTP ${res.status}`); }
+    const entry = await res.json();
+    document.getElementById('rq-finish-hint').textContent =
+      `Promoted into golden set v${entry.version} (${entry.n_added} case(s) added, ${entry.n_cases} total).`;
+    loadReviewQueue();
+    loadGoldenSetVersions();
+    loadGoldenRunStatus();
+  } catch (err) {
+    alert('Could not finish review: ' + err);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Finish Review';
+  }
+});
+
+async function loadGoldenSetVersions() {
+  const container = document.getElementById('golden-set-versions');
+  try {
+    const res = await fetch('/api/evals/golden-set/versions');
+    const d = await res.json();
+    container.innerHTML = '';
+    [...d.versions].reverse().forEach(v => {
+      const row = document.createElement('div');
+      row.className = 'gsv-row' + (v.version === d.latest_version ? ' latest' : '');
+      row.innerHTML = `<div><span class="gsv-version">v${v.version}</span> &mdash; ${v.n_cases} cases ` +
+        `<span class="gsv-note">(+${v.n_added}, ${new Date(v.created_at).toLocaleDateString()})</span></div>` +
+        (v.version === d.latest_version ? '<span class="gs-badge pass">Latest</span>' : '');
+      container.appendChild(row);
+    });
+  } catch (err) {
+    container.innerHTML = `<div class="empty-note">Error loading versions: ${err}</div>`;
+  }
+}
+
+async function loadGoldenRunStatus() {
+  const container = document.getElementById('golden-run-status');
+  try {
+    const res = await fetch('/api/evals/golden-run/status');
+    const s = await res.json();
+    const lastRunText = s.last_run
+      ? `Last run: ${new Date(s.last_run.run_at).toLocaleString()} on golden set v${s.last_run.golden_set_version} (${s.last_run.n_cases} cases)`
+      : 'No golden-set eval run on record yet.';
+    container.innerHTML = `<div class="${s.changed ? 'grs-changed' : 'grs-ok'}">${s.changed ? 'Changes pending' : 'Up to date'}</div>` +
+      `<div class="gs-meta" style="margin-top:4px;">${s.reason}</div>` +
+      `<div class="stale-note">${lastRunText}</div>`;
+  } catch (err) {
+    container.innerHTML = `<div class="empty-note">Error loading run status: ${err}</div>`;
+  }
+}
+
+// Progress bar while a golden-eval run is in flight -- reuses the SAME
+// SSE stream the live dashboard already connects to
+// (/api/monitoring/stream), listening for golden_run_progress events
+// golden_set_manager.run_golden_set_retrieval_eval() broadcasts after
+// each case is scored. Opened only for the duration of a run, not kept
+// open permanently (unlike the dashboard's own always-on connection),
+// since this page only needs it while a run is actually happening.
+let goldenRunProgressStream = null;
+
+function startGoldenRunProgressListener() {
+  const wrap = document.getElementById('golden-run-progress-wrap');
+  const fill = document.getElementById('golden-run-progress-fill');
+  const label = document.getElementById('golden-run-progress-label');
+  wrap.style.display = 'block';
+  fill.style.width = '0%';
+  label.textContent = 'Starting...';
+
+  goldenRunProgressStream = new EventSource('/api/monitoring/stream');
+  goldenRunProgressStream.addEventListener('golden_run_progress', (e) => {
+    const p = JSON.parse(e.data);
+    const pct = p.total ? Math.round((p.done / p.total) * 100) : 0;
+    fill.style.width = `${pct}%`;
+    label.textContent = p.done === 0
+      ? `Preparing ${p.total} case(s)...`
+      : `${p.done} / ${p.total} cases scored (${p.query_id})`;
+  });
+}
+
+function stopGoldenRunProgressListener() {
+  if (goldenRunProgressStream) { goldenRunProgressStream.close(); goldenRunProgressStream = null; }
+  document.getElementById('golden-run-progress-wrap').style.display = 'none';
+}
+
+document.getElementById('golden-run-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('golden-run-btn');
+  const resultEl = document.getElementById('golden-run-result');
+  btn.disabled = true;
+  btn.textContent = 'Running...';
+  resultEl.textContent = '';
+  startGoldenRunProgressListener();
+  try {
+    const res = await fetch('/api/evals/golden-run/run', { method: 'POST' });
+    if (!res.ok) { const d = await res.json(); throw new Error(d.detail || `HTTP ${res.status}`); }
+    const d = await res.json();
+    if (!d.ran) {
+      resultEl.textContent = `Skipped -- ${d.reason}`;
+    } else {
+      resultEl.textContent = `Done -- Recall@5 ${(d.metrics.recall_at_5 * 100).toFixed(0)}%, Top-1 ${(d.metrics.top_1_accuracy * 100).toFixed(0)}% (n=${d.metrics.n})`;
+      loadRetrievalEval();
+    }
+    loadGoldenRunStatus();
+    loadGoldenRunHistory();
+  } catch (err) {
+    resultEl.textContent = `Error: ${err}`;
+  } finally {
+    stopGoldenRunProgressListener();
+    btn.disabled = false;
+    btn.textContent = 'Run Golden Eval';
+  }
+});
+
+async function loadGoldenRunHistory() {
+  const container = document.getElementById('golden-run-history');
+  try {
+    const res = await fetch('/api/evals/golden-run/history');
+    const d = await res.json();
+    if (!d.runs.length) {
+      container.innerHTML = '<div class="empty-note">No runs logged yet.</div>';
+      return;
+    }
+    let html = '<table><thead><tr><th>Run</th><th>Golden set</th><th class="num">n</th>' +
+      '<th class="num">Recall@5</th><th class="num">Top-1</th><th class="num">MRR</th></tr></thead><tbody>';
+    d.runs.forEach(r => {
+      const m = r.metrics || {};
+      html += `<tr><td>${new Date(r.run_at).toLocaleString()}</td><td>v${r.golden_set_version}</td>` +
+        `<td class="num">${m.n ?? '—'}</td><td class="num">${fmtPct(m.recall_at_5)}</td>` +
+        `<td class="num">${fmtPct(m.top_1_accuracy)}</td><td class="num">${fmtNum(m.mrr)}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  } catch (err) {
+    container.innerHTML = `<div class="empty-note">Error loading run history: ${err}</div>`;
+  }
+}
+
+loadRetrievalEval();
+loadCalibration();
+loadGenerationEval();
+loadGoldenSet();
+rcLoadHistory();
+convLoadSessions();
+loadReviewQueue();
+loadGoldenSetVersions();
+loadGoldenRunStatus();
+loadGoldenRunHistory();
+</script>
+</body>
+</html>

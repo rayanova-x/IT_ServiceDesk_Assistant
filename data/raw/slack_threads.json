@@ -1,0 +1,85 @@
+[
+  {
+    "thread_id": "T001",
+    "channel": "#it-helpdesk-triage",
+    "topic_subcategory": "Plugin not loading",
+    "related_page_id": "200026",
+    "messages": [
+      {"user": "Priya", "time": "9:14 AM", "text": "anyone seen a plugin just silently not load on app startup? no error, it's just... not there"},
+      {"user": "Priya", "time": "9:14 AM", "text": "was working fine last week"},
+      {"user": "Dave", "time": "9:16 AM", "text": "yeah happened to me, check the plugin log first -- usually shows a version mismatch"},
+      {"user": "Priya", "time": "9:19 AM", "text": "oh there it is, yep version mismatch against the app build"},
+      {"user": "Dave", "time": "9:19 AM", "text": "update the plugin to match, that should do it"},
+      {"user": "Priya", "time": "9:24 AM", "text": "updated it, loads fine now 🙏"},
+      {"user": "Sam", "time": "9:41 AM", "text": "@Dave random q but do you know who owns the printer queue for floor 3?"},
+      {"user": "Dave", "time": "9:42 AM", "text": "no idea, ask facilities"}
+    ]
+  },
+  {
+    "thread_id": "T002",
+    "channel": "#it-helpdesk-triage",
+    "topic_subcategory": "Session timeout",
+    "related_page_id": "200028",
+    "messages": [
+      {"user": "Marcus", "time": "2:03 PM", "text": "getting logged out of the web app way sooner than it should, like every 5 min"},
+      {"user": "Marcus", "time": "2:03 PM", "text": "even while actively using it"},
+      {"user": "Renee", "time": "2:05 PM", "text": "is it just the app or does it re-prompt for full login (SSO)?"},
+      {"user": "Marcus", "time": "2:08 PM", "text": "just the app, SSO stays logged in"},
+      {"user": "Renee", "time": "2:09 PM", "text": "ok that's app-level then, not SSO. check the app's idle timeout setting for your role/group -- some roles got a shorter value pushed recently"},
+      {"user": "Marcus", "time": "2:15 PM", "text": "yep that was it, my role was on the shorter timeout by mistake. got it corrected"},
+      {"user": "Renee", "time": "2:15 PM", "text": "👍"},
+      {"user": "Ana", "time": "2:30 PM", "text": "lol unrelated but did anyone else's coffee machine break today"},
+      {"user": "Marcus", "time": "2:31 PM", "text": "😂 not IT's problem but also yes"}
+    ]
+  },
+  {
+    "thread_id": "T003",
+    "channel": "#it-helpdesk-triage",
+    "topic_subcategory": "Laptop screen blue tint",
+    "related_page_id": "200037",
+    "messages": [
+      {"user": "Jordan", "time": "10:50 AM", "text": "my laptop screen has this weird blue tint across the whole display, colors look off"},
+      {"user": "Jordan", "time": "10:50 AM", "text": "started this morning, nothing changed on my end"},
+      {"user": "Priya", "time": "10:55 AM", "text": "check display color calibration/profile first, sometimes it gets changed accidentally"},
+      {"user": "Jordan", "time": "11:02 AM", "text": "checked, profile looks normal actually"},
+      {"user": "Priya", "time": "11:03 AM", "text": "ok try an external monitor then, if tint doesn't show up there it's the panel not the settings"},
+      {"user": "Jordan", "time": "11:20 AM", "text": "tested on external monitor, totally clean. so it's the panel"},
+      {"user": "Priya", "time": "11:21 AM", "text": "yeah that's a hardware ticket then, panel defect. I'll log it for repair"},
+      {"user": "Jordan", "time": "11:22 AM", "text": "thanks!! 🙏"}
+    ]
+  },
+  {
+    "thread_id": "T004",
+    "channel": "#it-helpdesk-triage",
+    "topic_subcategory": "External HDD not mounting",
+    "related_page_id": "200038",
+    "messages": [
+      {"user": "Sam", "time": "3:12 PM", "text": "external drive shows up in device manager but doesn't mount, no drive letter or anything"},
+      {"user": "Sam", "time": "3:12 PM", "text": "on and off since yesterday"},
+      {"user": "Dave", "time": "3:14 PM", "text": "check disk management, does it show as unallocated/not initialized, or does it show a partition but just won't assign a letter?"},
+      {"user": "Sam", "time": "3:19 PM", "text": "shows a real partition, just no letter"},
+      {"user": "Dave", "time": "3:20 PM", "text": "ok that's a different branch than the unallocated case then, that one's usually just a manual drive letter assignment in disk management -- right click the partition, add a letter"},
+      {"user": "Sam", "time": "3:25 PM", "text": "did that, mounted right away. thanks!"},
+      {"user": "Renee", "time": "3:40 PM", "text": "quick one -- anyone know the wifi password for the guest network offhand"},
+      {"user": "Dave", "time": "3:41 PM", "text": "it's on the printed card at the front desk, not something we hand out in here"}
+    ]
+  },
+  {
+    "thread_id": "T005",
+    "channel": "#it-helpdesk-triage",
+    "topic_subcategory": "Application crash on exit",
+    "related_page_id": null,
+    "gap_filling": true,
+    "messages": [
+      {"user": "Renee", "time": "11:02 AM", "text": "getting another one of those exit crashes on the design app, but this looks like the v14.3 thing again"},
+      {"user": "Priya", "time": "11:04 AM", "text": "oh yeah the v14.3 bug, vendor still hasn't patched it as of last week"},
+      {"user": "Renee", "time": "11:05 AM", "text": "is there an actual fix or just the usual disable-autosave workaround from the SOP"},
+      {"user": "Priya", "time": "11:07 AM", "text": "no for v14.3 specifically that doesn't work, autosave isn't the cause this time -- it's actually the new cloud-sync plugin they bundled in that version, it hangs on shutdown"},
+      {"user": "Priya", "time": "11:07 AM", "text": "workaround is to disable the cloud-sync plugin specifically (not autosave), Settings > Plugins > Cloud Sync > disable, then it exits clean"},
+      {"user": "Renee", "time": "11:15 AM", "text": "tried it, works. good find"},
+      {"user": "Priya", "time": "11:15 AM", "text": "yeah this is v14.3-only as far as I've seen, don't think it's worth a full SOP page since the vendor patch should make it moot soon, just flagging here so we remember 🙏"},
+      {"user": "Sam", "time": "11:30 AM", "text": "unrelated but is the Friday all-hands still at 3pm"},
+      {"user": "Priya", "time": "11:31 AM", "text": "yep, unchanged"}
+    ]
+  }
+]

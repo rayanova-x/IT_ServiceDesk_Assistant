@@ -1,0 +1,20 @@
+{"query_id": "A01", "kind": "single_turn", "reason": "raw ticket dump, baseline answerable case"}
+{"query_id": "A05", "kind": "single_turn", "reason": "error log dump, tests grounding on noisy input"}
+{"query_id": "B02", "kind": "single_turn", "reason": "vague/unanswerable -- must NOT synthesize a guessed answer"}
+{"query_id": "B03", "kind": "single_turn", "reason": "bundled multi-question -- tests per-sub-query generation"}
+{"query_id": "B06", "kind": "single_turn", "reason": "compound unrelated issues -- one answerable, one not"}
+{"query_id": "C02", "kind": "single_turn", "reason": "IP address embedded in query"}
+{"query_id": "C09", "kind": "single_turn", "reason": "visual descriptor, no technical vocabulary"}
+{"query_id": "D03", "kind": "single_turn", "reason": "explicit recency ask -- tests date-aware prioritization"}
+{"query_id": "D07", "kind": "single_turn", "reason": "policy yes/no, unanswerable -- must not fabricate policy"}
+{"query_id": "E02", "kind": "single_turn", "reason": "vocabulary mismatch (slang for VPN)"}
+{"query_id": "E05", "kind": "single_turn", "reason": "frustrated/emotional venting, tests answer relevance amid noise"}
+{"query_id": "E10", "kind": "single_turn", "reason": "code-mixed language (Hindi/English)"}
+{"query_id": "F02", "kind": "single_turn", "reason": "confusable pair hard case -- tests faithfulness under retrieval ambiguity"}
+{"query_id": "F05", "kind": "single_turn", "reason": "trashed-page topic -- must not cite a trashed doc as current"}
+{"query_id": "F07", "kind": "single_turn", "reason": "silently-stale duplicate exists -- the exact bug fixed 2026-09-14, direct regression check"}
+{"query_id": "F09", "kind": "single_turn", "reason": "trashed page, different domain -- same trap as F05 elsewhere in taxonomy"}
+{"query_id": "G01", "kind": "single_turn", "reason": "multi-turn control (no prior context) for comparison against G03/G06"}
+{"query_id": "G03", "kind": "multi_turn", "reason": "resuming after long gap -- tests Step 0 context carries into generation"}
+{"query_id": "G05", "kind": "multi_turn", "reason": "topic change mid-session, new topic unanswerable -- must not carry old topic's answer forward"}
+{"query_id": "G06", "kind": "multi_turn", "reason": "recency intent surfaces only in follow-up -- tests wants_latest survives into generation"}

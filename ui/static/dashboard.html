@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAG Observability</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+  :root {
+    --canvas: #F7F5EE;
+    --surface: #FFFFFF;
+    --surface-alt: #E4F1E6;
+    --surface-sunken: #F4F2EA;
+    --ink: #161616;
+    --ink-muted: rgba(22,22,22,0.62);
+    --ink-subtle: rgba(22,22,22,0.45);
+    --accent: #9BCBA8;
+    --accent-ink: #161616;
+    --border: #161616;
+    --border-w: 2px;
+    --radius: 12px;
+    --radius-chip: 8px;
+    --shadow: 4px 4px 0 0 var(--border);
+    --good: #1a7a4c;
+    --good-soft: #dff3e6;
+    --warn: #8a5a00;
+    --warn-soft: #fff1cf;
+    --bad: #a3242a;
+    --bad-soft: #fbdede;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--canvas); color: var(--ink);
+  }
+  .page { max-width: 1080px; margin: 0 auto; padding: 36px 28px 64px; }
+  header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px; }
+  h1 { font-size: 26px; font-weight: 700; margin: 0; letter-spacing: -0.01em; }
+  .subtitle { color: var(--ink-muted); font-size: 13px; margin: 4px 0 28px; max-width: 680px; line-height: 1.55; }
+  a.back { color: var(--ink-muted); font-size: 12.5px; text-decoration: none; font-weight: 500; }
+  a.back:hover { color: var(--ink); }
+
+  .section-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-subtle); margin: 36px 0 12px; padding-bottom: 6px; border-bottom: 1px solid rgba(22,22,22,0.12);
+  }
+  .section-label:first-of-type { margin-top: 0; }
+  .section-note { font-size: 12px; color: var(--ink-muted); margin: -6px 0 16px; max-width: 640px; line-height: 1.55; }
+
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; }
+  .card {
+    background: var(--surface); border: var(--border-w) solid var(--border); border-radius: var(--radius);
+    padding: 14px 16px; box-shadow: var(--shadow);
+  }
+  .card .label { font-size: 11px; color: var(--ink-muted); margin-bottom: 6px; font-weight: 500; letter-spacing: 0.02em; }
+  .card .value { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .card .value.good { color: var(--good); }
+  .card .value.warn { color: var(--warn); }
+  .card .value.bad { color: var(--bad); }
+  .card .sub { font-size: 11px; color: var(--ink-muted); margin-top: 4px; }
+
+  .panel {
+    background: var(--surface); border: var(--border-w) solid var(--border); border-radius: var(--radius);
+    padding: 18px 20px; box-shadow: var(--shadow);
+  }
+  .panel + .panel { margin-top: 16px; }
+  .panel h2 { font-size: 14px; font-weight: 700; margin: 0 0 12px; }
+
+  .chart-wrap { overflow-x: auto; }
+  svg text { font-size: 10.5px; fill: var(--ink-muted); }
+
+  .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 12.5px; }
+  .bar-row .bar-label { width: 170px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bar-track { flex: 1; height: 16px; background: var(--surface-sunken); border-radius: 4px; overflow: hidden; border: 1px solid rgba(22,22,22,0.1); }
+  .bar-fill { height: 100%; background: var(--accent); }
+  .bar-count { width: 40px; text-align: right; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+
+  .empty-note { color: var(--ink-muted); font-size: 13px; padding: 24px 0; text-align: center; }
+  .stale-note { font-size: 11px; color: var(--ink-subtle); margin-top: 10px; font-family: monospace; }
+
+  .live-dot {
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--good); margin-right: 6px; animation: pulse 1.6s infinite;
+  }
+  .live-dot.off { background: var(--ink-subtle); animation: none; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+  .feed { max-height: 320px; overflow-y: auto; font-size: 12.5px; }
+  .feed-row {
+    display: flex; gap: 10px; padding: 7px 0; border-bottom: 1px solid rgba(22,22,22,0.1);
+    align-items: baseline; animation: fadein 0.3s ease-out;
+  }
+  @keyframes fadein { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+  .feed-row:last-child { border-bottom: none; }
+  .feed-time { color: var(--ink-muted); width: 64px; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+  .feed-badge {
+    font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 6px; flex-shrink: 0;
+    letter-spacing: 0.02em; text-transform: uppercase;
+  }
+  .feed-badge.ok { background: var(--good-soft); color: var(--good); }
+  .feed-badge.warn { background: var(--warn-soft); color: var(--warn); }
+  .feed-badge.bad { background: var(--bad-soft); color: var(--bad); }
+  .feed-text { color: var(--ink); }
+
+  .latency-bars { display: flex; flex-direction: column; gap: 6px; }
+  .latency-row { display: flex; align-items: center; gap: 10px; font-size: 12.5px; }
+  .latency-label { width: 150px; flex-shrink: 0; color: var(--ink-muted); }
+  .latency-track { flex: 1; height: 14px; background: var(--surface-sunken); border-radius: 4px; overflow: hidden; border: 1px solid rgba(22,22,22,0.1); }
+  .latency-fill { height: 100%; background: var(--accent); }
+  .latency-ms { width: 70px; text-align: right; font-variant-numeric: tabular-nums; color: var(--ink-muted); }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>RAG Observability</h1>
+    <div style="display:flex; gap:14px; align-items:baseline;">
+      <a class="back" href="/evals">Offline evals &rarr;</a>
+      <a class="back" href="/">&larr; Back to chat</a>
+    </div>
+  </header>
+  <p class="subtitle">
+    Live production signals only. Offline eval results (retrieval quality, generation-quality
+    judge scores, confidence calibration) live on their own page &mdash;
+    <a href="/evals">view offline evals &rarr;</a> &mdash; kept separate deliberately, since blending a
+    periodically-refreshed, fixed-test-set measurement into a live-traffic view invites mistaking one
+    for the other.
+  </p>
+
+  <div class="section-label">
+    <span class="live-dot" id="live-dot"></span>Live activity feed
+  </div>
+  <p class="section-note">
+    Pushed in real time over Server-Sent Events as requests complete &mdash; logins, finished turns,
+    and permission-filter exclusions &mdash; not polled. Matches Anthropic's own framing (their
+    "demystifying evals" post): production monitoring is reactive, catching activity as it happens,
+    while offline eval numbers (see link above) are a separate, fixed-test-set measurement.
+  </p>
+  <div class="panel">
+    <div id="live-feed" class="feed">
+      <div class="empty-note">Waiting for activity&hellip; send a chat message in another tab to see it appear here.</div>
+    </div>
+  </div>
+
+  <div class="section-label">Live production traffic</div>
+  <p class="section-note">
+    Deterministic signals logged automatically on every real turn (no LLM-judge cost) &mdash;
+    same convention as Anthropic's own production monitoring: track decision patterns and
+    structure, not conversation content. Faithfulness / Answer Relevance stay a separate,
+    curated offline eval (<code>judge_generation_eval.py</code>), not a live-traffic cost.
+  </p>
+  <div id="live-cards" class="card-grid"></div>
+
+  <div class="panel">
+    <h2>Rates over time</h2>
+    <div id="timeseries-chart" class="chart-wrap"></div>
+    <div id="timeseries-empty" class="empty-note" hidden>No turns logged yet.</div>
+  </div>
+
+  <div class="panel">
+    <h2>Category distribution</h2>
+    <div id="category-bars"></div>
+    <div id="category-empty" class="empty-note" hidden>No categorized turns yet.</div>
+  </div>
+
+  <div class="panel">
+    <h2>Latency by pipeline stage</h2>
+    <p class="section-note" style="margin-top:-4px;">
+      Average wall-clock time per stage across the most recent timed turns &mdash; where time actually
+      goes (retrieval/rerank vs. each Gemini call), not just a single end-to-end response time.
+    </p>
+    <div id="latency-bars" class="latency-bars"></div>
+    <div id="latency-empty" class="empty-note" hidden>No timed turns yet.</div>
+  </div>
+
+  <div class="panel">
+    <h2>Recent access-denial audit</h2>
+    <p class="section-note" style="margin-top:-4px;">
+      Every time the Step 4.5 permission filter actually excluded restricted content from a result &mdash;
+      who asked, what was withheld, when. Empty is good: it means no one's query was permission-filtered.
+    </p>
+    <div id="access-denial-list" class="feed"></div>
+    <div id="access-denial-empty" class="empty-note" hidden>No access denials logged.</div>
+  </div>
+</div>
+
+<script>
+const fmtPct = (v) => v === null || v === undefined ? '—' : `${(v * 100).toFixed(0)}%`;
+const fmtNum = (v, d = 3) => v === null || v === undefined ? '—' : v.toFixed(d);
+
+function rateClass(v, warnAt, badAt) {
+  if (v === null || v === undefined) return '';
+  if (v >= badAt) return 'bad';
+  if (v >= warnAt) return 'warn';
+  return 'good';
+}
+
+function card(label, value, cls, sub) {
+  const div = document.createElement('div');
+  div.className = 'card';
+  div.innerHTML = `<div class="label">${label}</div>` +
+    `<div class="value${cls ? ' ' + cls : ''}">${value}</div>` +
+    (sub ? `<div class="sub">${sub}</div>` : '');
+  return div;
+}
+
+async function loadLiveMetrics() {
+  const container = document.getElementById('live-cards');
+  const res = await fetch('/api/monitoring');
+  const m = await res.json();
+  if (!m.total_turns) {
+    container.innerHTML = '<div class="empty-note">No turns logged yet -- send a message in the chat first.</div>';
+    return;
+  }
+  container.appendChild(card('Total turns', m.total_turns));
+  container.appendChild(card('Low-confidence rate', fmtPct(m.low_confidence_rate), rateClass(m.low_confidence_rate, 0.3, 0.5)));
+  container.appendChild(card('Knowledge-gap rate', fmtPct(m.knowledge_gap_rate), rateClass(m.knowledge_gap_rate, 0.3, 0.5)));
+  container.appendChild(card('Same-topic-pair rate', fmtPct(m.same_topic_pair_rate), null, 'stale-duplicate KB pairs detected'));
+  container.appendChild(card('Non-search rate', fmtPct(m.off_topic_rate), null, 'direct reply, no KB search needed'));
+  container.appendChild(card('Error rate', fmtPct(m.error_rate), rateClass(m.error_rate, 0.05, 0.15), 'Gemini unavailable after retries'));
+  container.appendChild(card('Access denials', m.access_denial_count, m.access_denial_count > 0 ? 'warn' : 'good', 'permission filter exclusions, all-time'));
+  container.appendChild(card(
+    'Mean citation accuracy', m.mean_citation_accuracy !== null ? fmtPct(m.mean_citation_accuracy) : '—',
+    m.mean_citation_accuracy !== null ? rateClass(1 - m.mean_citation_accuracy, 0.1, 0.3) : '',
+    `n=${m.n_turns_with_citations} turns cited a source`
+  ));
+  container.appendChild(card(
+    'Mean latency', m.mean_latency_ms !== null ? `${(m.mean_latency_ms / 1000).toFixed(1)}s` : '—',
+    null, m.max_latency_ms !== null ? `max ${(m.max_latency_ms / 1000).toFixed(1)}s, n=${m.n_turns_timed}` : ''
+  ));
+}
+
+async function loadLatencyBreakdown() {
+  const container = document.getElementById('latency-bars');
+  const emptyNote = document.getElementById('latency-empty');
+  const res = await fetch('/api/monitoring/latency');
+  const m = await res.json();
+  const entries = Object.entries(m.stages || {});
+  if (!entries.length) { emptyNote.hidden = false; return; }
+
+  const STAGE_LABELS = {
+    step0_context: 'Step 0: context rewrite', step1_parsing: 'Step 1: regex parsing',
+    step2_routing: 'Step 2: routing (LLM)', step3_understanding: 'Step 3: understanding (LLM)',
+    retrieval_rerank: 'Steps 5-6.5: retrieval + rerank', step7_recency: 'Step 7: recency rerank',
+    step8_confidence: 'Step 8: confidence check', step9_generation: 'Step 9: generation (LLM)',
+  };
+  const maxMs = Math.max(...entries.map(([, ms]) => ms));
+  // Keep pipeline order, not sorted by size -- the point is seeing WHERE
+  // in the sequence time goes, not just a leaderboard.
+  const order = Object.keys(STAGE_LABELS);
+  entries.sort((a, b) => order.indexOf(a[0]) - order.indexOf(b[0]));
+  entries.forEach(([stage, ms]) => {
+    const row = document.createElement('div');
+    row.className = 'latency-row';
+    const pct = maxMs > 0 ? (ms / maxMs) * 100 : 0;
+    row.innerHTML = `<div class="latency-label">${STAGE_LABELS[stage] || stage}</div>` +
+      `<div class="latency-track"><div class="latency-fill" style="width:${pct}%"></div></div>` +
+      `<div class="latency-ms">${ms.toFixed(0)}ms</div>`;
+    container.appendChild(row);
+  });
+}
+
+async function loadAccessDenials() {
+  const container = document.getElementById('access-denial-list');
+  const emptyNote = document.getElementById('access-denial-empty');
+  const res = await fetch('/api/monitoring/access-denials?limit=10');
+  const rows = await res.json();
+  if (!rows.length) { emptyNote.hidden = false; return; }
+  container.innerHTML = '';
+  rows.forEach(d => {
+    const row = document.createElement('div');
+    row.className = 'feed-row';
+    const t = new Date(d.timestamp).toLocaleTimeString();
+    row.innerHTML = `<div class="feed-time">${t}</div>` +
+      `<div class="feed-badge warn">${d.excluded_count} withheld</div>` +
+      `<div class="feed-text"><strong>${d.username || 'unknown'}</strong> asked about "${d.sub_query}" &mdash; ` +
+      `${d.excluded_groups} content excluded</div>`;
+    container.appendChild(row);
+  });
+}
+
+// --- Live feed (SSE push) --------------------------------------------
+const liveFeed = document.getElementById('live-feed');
+const liveDot = document.getElementById('live-dot');
+let liveFeedHasRows = false;
+
+function pushFeedRow(badgeCls, badgeText, text) {
+  if (!liveFeedHasRows) { liveFeed.innerHTML = ''; liveFeedHasRows = true; }
+  const row = document.createElement('div');
+  row.className = 'feed-row';
+  const t = new Date().toLocaleTimeString();
+  row.innerHTML = `<div class="feed-time">${t}</div>` +
+    `<div class="feed-badge ${badgeCls}">${badgeText}</div>` +
+    `<div class="feed-text">${text}</div>`;
+  liveFeed.insertBefore(row, liveFeed.firstChild);
+  // Cap the feed so it doesn't grow unbounded during a long-running demo.
+  while (liveFeed.children.length > 50) liveFeed.removeChild(liveFeed.lastChild);
+}
+
+function handleLiveEvent(eventName, data) {
+  if (eventName === 'login') {
+    pushFeedRow('ok', 'LOGIN', `<strong>${data.display_name}</strong> signed in`);
+  } else if (eventName === 'access_denied') {
+    pushFeedRow('warn', 'DENIED', `<strong>${data.username}</strong>'s query excluded ${data.excluded_count} restricted result(s) (${data.excluded_groups.join(', ')})`);
+  } else if (eventName === 'turn_completed') {
+    if (data.stopped_at === 'error') {
+      pushFeedRow('bad', 'ERROR', `<strong>${data.username || 'someone'}</strong>'s request failed during ${data.stage || 'processing'} (Gemini unavailable)`);
+    } else if (data.stopped_at === 'declined') {
+      pushFeedRow('ok', 'DECLINED', `<strong>${data.username || 'someone'}</strong>'s message got a direct reply, no search needed`);
+    } else {
+      const cls = data.low_confidence ? 'warn' : 'ok';
+      const modeLabel = data.mode === 'synthesized' ? 'answered' : 'candidates shown';
+      const latency = data.total_latency_ms ? ` in ${(data.total_latency_ms / 1000).toFixed(1)}s` : '';
+      pushFeedRow(cls, 'TURN', `<strong>${data.username || 'someone'}</strong> &mdash; ${data.category || 'uncategorized'}, ${modeLabel}${latency}`);
+    }
+    // Something changed server-side -- refresh the aggregate tiles/charts
+    // so they stay in sync with the feed instead of only updating on a
+    // manual page reload.
+    loadLiveMetrics();
+    loadLatencyBreakdown();
+    loadCategoryBreakdown();
+    if (data.stopped_at !== 'ok' || !data.low_confidence) loadTimeseries();
+  }
+}
+
+function connectLiveStream() {
+  const es = new EventSource('/api/monitoring/stream');
+  es.onopen = () => { liveDot.classList.remove('off'); };
+  es.onerror = () => { liveDot.classList.add('off'); };
+  es.addEventListener('connected', () => { liveDot.classList.remove('off'); });
+  es.addEventListener('login', (e) => handleLiveEvent('login', JSON.parse(e.data)));
+  es.addEventListener('access_denied', (e) => { handleLiveEvent('access_denied', JSON.parse(e.data)); loadAccessDenials(); });
+  es.addEventListener('turn_completed', (e) => handleLiveEvent('turn_completed', JSON.parse(e.data)));
+  // heartbeat events need no handler -- their only job is keeping the
+  // connection alive through idle timeouts; EventSource's built-in
+  // auto-reconnect handles a genuine drop.
+}
+
+function buildTimeseriesChart(rows) {
+  const container = document.getElementById('timeseries-chart');
+  const emptyNote = document.getElementById('timeseries-empty');
+  if (!rows.length) { emptyNote.hidden = false; return; }
+
+  const W = Math.max(560, rows.length * 70);
+  const H = 220;
+  const padL = 40, padR = 16, padT = 16, padB = 30;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+
+  const series = [
+    { key: 'low_confidence_rate', color: '#c0392b', label: 'Low-confidence' },
+    { key: 'knowledge_gap_rate', color: '#b8860b', label: 'Knowledge gap' },
+    { key: 'same_topic_pair_rate', color: '#2f6fed', label: 'Same-topic pair' },
+  ];
+
+  const x = (i) => padL + (rows.length === 1 ? plotW / 2 : (i / (rows.length - 1)) * plotW);
+  const y = (v) => padT + plotH - (v * plotH);
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Daily rate trends for low-confidence, knowledge-gap, and same-topic-pair detections">`;
+
+  // gridlines + y labels at 0/25/50/75/100%
+  for (let p = 0; p <= 100; p += 25) {
+    const gy = y(p / 100);
+    svg += `<line x1="${padL}" y1="${gy}" x2="${W - padR}" y2="${gy}" stroke="var(--grid-line)" stroke-width="1"/>`;
+    svg += `<text x="${padL - 8}" y="${gy + 3}" text-anchor="end">${p}%</text>`;
+  }
+
+  // x labels (day, short form)
+  rows.forEach((r, i) => {
+    const label = r.day.slice(5); // MM-DD
+    svg += `<text x="${x(i)}" y="${H - 8}" text-anchor="middle">${label}</text>`;
+  });
+
+  series.forEach(s => {
+    const points = rows.map((r, i) => `${x(i)},${y(r[s.key])}`).join(' ');
+    svg += `<polyline points="${points}" fill="none" stroke="${s.color}" stroke-width="2"/>`;
+    rows.forEach((r, i) => {
+      svg += `<circle cx="${x(i)}" cy="${y(r[s.key])}" r="3" fill="${s.color}"/>`;
+    });
+  });
+
+  svg += `</svg>`;
+
+  let legend = '<div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap;">';
+  series.forEach(s => {
+    legend += `<div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">` +
+      `<span style="width:10px;height:10px;border-radius:50%;background:${s.color};display:inline-block;"></span>${s.label}</div>`;
+  });
+  legend += '</div>';
+
+  container.innerHTML = svg + legend;
+}
+
+async function loadTimeseries() {
+  const res = await fetch('/api/monitoring/timeseries?limit=30');
+  const rows = await res.json();
+  buildTimeseriesChart(rows);
+}
+
+async function loadCategoryBreakdown() {
+  const container = document.getElementById('category-bars');
+  const emptyNote = document.getElementById('category-empty');
+  const res = await fetch('/api/monitoring');
+  const m = await res.json();
+  const entries = Object.entries(m.by_category || {});
+  if (!entries.length) { emptyNote.hidden = false; return; }
+
+  const maxN = Math.max(...entries.map(([, n]) => n));
+  entries.sort((a, b) => b[1] - a[1]);
+  entries.forEach(([category, n]) => {
+    const row = document.createElement('div');
+    row.className = 'bar-row';
+    const pct = (n / maxN) * 100;
+    row.innerHTML = `<div class="bar-label">${category}</div>` +
+      `<div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>` +
+      `<div class="bar-count">${n}</div>`;
+    container.appendChild(row);
+  });
+}
+
+loadLiveMetrics();
+loadTimeseries();
+loadCategoryBreakdown();
+loadLatencyBreakdown();
+loadAccessDenials();
+connectLiveStream();
+</script>
+</body>
+</html>

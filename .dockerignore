@@ -1,0 +1,16 @@
+.venv/
+.env
+local_model_cache/
+chroma_db/
+__pycache__/
+*.pyc
+outputs/
+sessions.db
+.git/
+.claude/
+logs/
+notebooks/
+tests/
+docs/
+reference_docs/
+server_log_restart.txt

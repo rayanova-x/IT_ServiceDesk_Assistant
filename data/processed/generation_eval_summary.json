@@ -1,0 +1,16 @@
+{
+  "run_at": "2026-10-15T22:36:25.595711",
+  "self_judge_model": "gemini-3.5-flash-lite",
+  "strong_judge_model": "gemini-3.6-flash",
+  "generation_model": "gemini-3.5-flash-lite",
+  "n_synthesized": 6,
+  "n_pending": 0,
+  "n_candidates_only": 16,
+  "n_self_graded": 1,
+  "n_independently_graded": 5,
+  "mean_faithfulness": 4.667,
+  "mean_relevance": 4.667,
+  "mean_faithfulness_self_graded": 5.0,
+  "mean_faithfulness_independently_graded": 4.6,
+  "contract_violations": 0
+}

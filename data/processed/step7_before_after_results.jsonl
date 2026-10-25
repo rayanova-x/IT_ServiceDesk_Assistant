@@ -1,0 +1,15 @@
+{"query_id": "D03", "targeted": true, "wants_latest": true, "before_rank": 2, "after_rank": 2, "before_top1": false, "after_top1": false}
+{"query_id": "F03", "targeted": true, "wants_latest": false, "before_rank": null, "after_rank": null, "before_top1": false, "after_top1": false}
+{"query_id": "F05", "targeted": true, "wants_latest": false, "before_rank": 1, "after_rank": 1, "before_top1": true, "after_top1": true}
+{"query_id": "F07", "targeted": true, "wants_latest": true, "before_rank": 1, "after_rank": 1, "before_top1": true, "after_top1": true}
+{"query_id": "F09", "targeted": true, "wants_latest": false, "before_rank": 1, "after_rank": 1, "before_top1": true, "after_top1": true}
+{"query_id": "G06", "targeted": true, "wants_latest": true, "before_rank": 2, "after_rank": 2, "before_top1": false, "after_top1": false}
+{"query_id": "A01", "targeted": false, "wants_latest": false, "before_rank": 3, "after_rank": 3, "before_top1": false, "after_top1": false}
+{"query_id": "A02", "targeted": false, "wants_latest": false, "before_rank": 1, "after_rank": 1, "before_top1": true, "after_top1": true}
+{"query_id": "B02", "targeted": false, "wants_latest": false, "before_rank": null, "after_rank": null, "before_top1": false, "after_top1": false}
+{"query_id": "B06", "targeted": false, "wants_latest": false, "before_rank": 2, "after_rank": 2, "before_top1": false, "after_top1": false}
+{"query_id": "C03", "targeted": false, "wants_latest": false, "before_rank": 1, "after_rank": 1, "before_top1": true, "after_top1": true}
+{"query_id": "C05", "targeted": false, "wants_latest": false, "before_rank": null, "after_rank": null, "before_top1": false, "after_top1": false}
+{"query_id": "E01", "targeted": false, "wants_latest": false, "before_rank": null, "after_rank": null, "before_top1": false, "after_top1": false}
+{"query_id": "E10", "targeted": false, "wants_latest": false, "before_rank": 1, "after_rank": 1, "before_top1": true, "after_top1": true}
+{"query_id": "F10", "targeted": false, "wants_latest": false, "before_rank": 2, "after_rank": 2, "before_top1": false, "after_top1": false}

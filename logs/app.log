@@ -1,0 +1,516 @@
+{"ts": "2026-10-12T22:58:20", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-12T22:58:20", "level": "WARNING", "logger": "google_genai.models", "message": "Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream."}
+{"ts": "2026-10-12T22:58:21", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-12T22:58:21", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-12T22:58:23", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-12T22:58:27", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-12T22:58:28", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-12T23:00:35", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "bob"}
+{"ts": "2026-10-12T23:00:42", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-12T23:00:42", "level": "WARNING", "logger": "google_genai.models", "message": "Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream."}
+{"ts": "2026-10-12T23:00:43", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-12T23:00:43", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-12T23:00:44", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-12T23:00:48", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-12T23:00:49", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-12T23:24:20", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-12T23:24:20", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages/stream \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-12T23:24:20", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: GET http://testserver/api/me \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-12T23:24:20", "level": "WARNING", "logger": "ui.server", "message": "login failed for username=alice", "username": "alice"}
+{"ts": "2026-10-12T23:24:20", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-12T23:24:20", "level": "WARNING", "logger": "ui.server", "message": "login failed for username=nonexistent_user", "username": "nonexistent_user"}
+{"ts": "2026-10-12T23:24:20", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-12T23:24:21", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "alice"}
+{"ts": "2026-10-12T23:24:21", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-12T23:24:21", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: GET http://testserver/api/me \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-12T23:24:21", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/logout \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-12T23:24:21", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: GET http://testserver/api/me \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-12T23:24:21", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-12T23:24:21", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "carol"}
+{"ts": "2026-10-12T23:24:21", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-12T23:24:21", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-12T23:24:21", "level": "WARNING", "logger": "google_genai.models", "message": "Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream."}
+{"ts": "2026-10-12T23:24:22", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-12T23:24:22", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-12T23:24:23", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-12T23:24:27", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-12T23:24:28", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-12T23:24:28", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-12T23:24:28", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: GET http://testserver/api/sessions/5c6f5aa5-daac-4af6-8a41-b263b6d90edc/turns \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-12T23:24:28", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/logout \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-12T23:24:28", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "bob"}
+{"ts": "2026-10-12T23:24:28", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-12T23:24:28", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-12T23:24:29", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-12T23:24:29", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-12T23:24:30", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-12T23:24:33", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-12T23:24:33", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/logout \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-13T00:02:12", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "carol"}
+{"ts": "2026-10-13T00:02:25", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-13T00:02:25", "level": "WARNING", "logger": "google_genai.models", "message": "Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream."}
+{"ts": "2026-10-13T00:02:26", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-13T00:02:26", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-13T00:02:27", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-13T00:02:52", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-13T00:02:53", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-23T23:08:24", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "alice"}
+{"ts": "2026-10-23T23:09:15", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-23T23:09:15", "level": "WARNING", "logger": "google_genai.models", "message": "Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream."}
+{"ts": "2026-10-23T23:09:22", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-23T23:22:12", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-23T23:22:12", "level": "WARNING", "logger": "google_genai.models", "message": "Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream."}
+{"ts": "2026-10-23T23:22:13", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-23T23:22:21", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-23T23:22:22", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-23T23:22:22", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-23T23:22:23", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-23T23:26:09", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "dave"}
+{"ts": "2026-10-23T23:26:13", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-23T23:26:14", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-23T23:26:15", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-23T23:26:17", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-23T23:26:26", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-23T23:26:27", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-23T23:26:27", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-23T23:26:28", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-23T23:26:28", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-23T23:26:30", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-23T23:28:00", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "dave"}
+{"ts": "2026-10-23T23:28:00", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-23T23:28:00", "level": "WARNING", "logger": "google_genai.models", "message": "Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream."}
+{"ts": "2026-10-23T23:28:01", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-23T23:28:01", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-23T23:28:02", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-23T23:28:02", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-23T23:28:03", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-23T23:28:03", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-23T23:28:05", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:19:22", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "dave"}
+{"ts": "2026-10-24T00:19:37", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:19:37", "level": "WARNING", "logger": "google_genai.models", "message": "Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream."}
+{"ts": "2026-10-24T00:19:39", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:19:39", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:19:40", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:19:49", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:19:51", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:19:51", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:19:51", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:19:51", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:19:52", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:20:02", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:20:02", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:20:02", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:20:03", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:20:03", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:20:05", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:20:05", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:20:06", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:20:06", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:20:07", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:24:26", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:24:27", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:24:38", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:24:39", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:24:39", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:24:40", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:24:40", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:24:42", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:35:15", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "dave"}
+{"ts": "2026-10-24T00:36:54", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "dave"}
+{"ts": "2026-10-24T00:36:55", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:36:55", "level": "WARNING", "logger": "google_genai.models", "message": "Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream."}
+{"ts": "2026-10-24T00:36:57", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:36:57", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:36:59", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:37:08", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:37:09", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:37:09", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:37:10", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:37:10", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:37:11", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:37:28", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "bob"}
+{"ts": "2026-10-24T00:40:18", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:40:19", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:40:19", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:40:20", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:50:15", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "dave"}
+{"ts": "2026-10-24T00:50:16", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:50:16", "level": "WARNING", "logger": "google_genai.models", "message": "Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream."}
+{"ts": "2026-10-24T00:50:17", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:50:17", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:50:18", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:50:24", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:50:25", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:50:25", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:50:26", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:50:26", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:50:27", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:54:47", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:54:47", "level": "WARNING", "logger": "google_genai.models", "message": "Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream."}
+{"ts": "2026-10-24T00:54:48", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:54:55", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:54:56", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:54:56", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:54:56", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:54:56", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:54:57", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:57:10", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "dave"}
+{"ts": "2026-10-24T00:57:15", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:57:15", "level": "WARNING", "logger": "google_genai.models", "message": "Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream."}
+{"ts": "2026-10-24T00:57:16", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:57:16", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:57:17", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:57:21", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:57:22", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:57:22", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:57:23", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:57:23", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:57:24", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T00:59:59", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T00:59:59", "level": "WARNING", "logger": "google_genai.models", "message": "Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream."}
+{"ts": "2026-10-24T01:00:00", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:00:08", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:00:09", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:00:09", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:00:10", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:00:45", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:00:46", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:00:46", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:00:46", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:00:46", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:00:47", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:01:46", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "dave"}
+{"ts": "2026-10-24T01:01:47", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:01:49", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:01:49", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:01:50", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:01:55", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:01:56", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:01:56", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:01:57", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:01:57", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:01:59", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:01:59", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:02:00", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:02:00", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:02:00", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:02:00", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:02:01", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:10:12", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:10:12", "level": "WARNING", "logger": "google_genai.models", "message": "Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream."}
+{"ts": "2026-10-24T01:10:13", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:10:18", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:10:19", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:10:19", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:10:20", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:10:34", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:10:35", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:10:35", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:10:36", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:22:23", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:22:23", "level": "WARNING", "logger": "google_genai.models", "message": "Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream."}
+{"ts": "2026-10-24T01:22:24", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:22:25", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:22:25", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:22:25", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:22:27", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:23:03", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:23:04", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:23:04", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:23:05", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:23:09", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:23:09", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:23:09", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:23:10", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:28:48", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "dave"}
+{"ts": "2026-10-24T01:28:49", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:28:49", "level": "WARNING", "logger": "google_genai.models", "message": "Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream."}
+{"ts": "2026-10-24T01:28:50", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:28:50", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:28:52", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:28:52", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:28:54", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:28:58", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:28:59", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:28:59", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:29:00", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:29:00", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:29:01", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:29:01", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:29:02", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:29:02", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:29:03", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:29:03", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:29:04", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:29:04", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:29:06", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:31:01", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:31:02", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:31:02", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:31:03", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:31:09", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:31:10", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:31:10", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:31:11", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:33:28", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "alice"}
+{"ts": "2026-10-24T01:34:09", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:34:10", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:34:10", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:34:11", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:34:24", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:34:25", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:34:25", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:34:26", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:34:26", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:34:27", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:48:17", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-24T01:48:17", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages/stream \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-24T01:48:17", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: GET http://testserver/api/me \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:48:17", "level": "WARNING", "logger": "ui.server", "message": "login failed for username=alice", "username": "alice"}
+{"ts": "2026-10-24T01:48:17", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-24T01:48:17", "level": "WARNING", "logger": "ui.server", "message": "login failed for username=nonexistent_user", "username": "nonexistent_user"}
+{"ts": "2026-10-24T01:48:17", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-24T01:48:18", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "alice"}
+{"ts": "2026-10-24T01:48:18", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:48:18", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: GET http://testserver/api/me \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:48:18", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/logout \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:48:18", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: GET http://testserver/api/me \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:48:18", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-24T01:48:18", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "carol"}
+{"ts": "2026-10-24T01:48:18", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:48:19", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:48:24", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T01:48:24", "level": "WARNING", "logger": "google_genai.models", "message": "Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream."}
+{"ts": "2026-10-24T01:48:25", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:48:25", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:48:25", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: GET http://testserver/api/sessions/65ca7e49-80e4-41d0-80af-2f8c5c51884d/turns \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:48:25", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/logout \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:48:26", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "bob"}
+{"ts": "2026-10-24T01:48:26", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:48:30", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:48:34", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:48:34", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/logout \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:50:13", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "dave"}
+{"ts": "2026-10-24T01:50:16", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:50:22", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:50:24", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:50:26", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:50:32", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:51:07", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "alice"}
+{"ts": "2026-10-24T01:51:20", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:51:28", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:51:44", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:51:52", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T01:52:15", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:04:53", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-24T02:04:53", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages/stream \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-24T02:04:53", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: GET http://testserver/api/me \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:04:53", "level": "WARNING", "logger": "ui.server", "message": "login failed for username=alice", "username": "alice"}
+{"ts": "2026-10-24T02:04:53", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-24T02:04:53", "level": "WARNING", "logger": "ui.server", "message": "login failed for username=nonexistent_user", "username": "nonexistent_user"}
+{"ts": "2026-10-24T02:04:53", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-24T02:04:53", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "alice"}
+{"ts": "2026-10-24T02:04:53", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:04:53", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: GET http://testserver/api/me \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:04:53", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/logout \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:04:53", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: GET http://testserver/api/me \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:04:53", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-24T02:04:54", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "carol"}
+{"ts": "2026-10-24T02:04:54", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:04:55", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:04:59", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T02:04:59", "level": "WARNING", "logger": "google_genai.models", "message": "Direct use of automatic function calling (AFC) in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream. Similarly, direct use of AFC in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message."}
+{"ts": "2026-10-24T02:05:00", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:streamGenerateContent?alt=sse \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:05:01", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:05:01", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: GET http://testserver/api/sessions/34b257a8-15be-44b0-a65d-66531a412324/turns \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:05:01", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/logout \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:05:01", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "bob"}
+{"ts": "2026-10-24T02:05:01", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:05:02", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:05:06", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:05:06", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/logout \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:08:17", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-24T02:08:17", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages/stream \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-24T02:08:17", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: GET http://testserver/api/me \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:08:17", "level": "WARNING", "logger": "ui.server", "message": "login failed for username=alice", "username": "alice"}
+{"ts": "2026-10-24T02:08:17", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-24T02:08:17", "level": "WARNING", "logger": "ui.server", "message": "login failed for username=nonexistent_user", "username": "nonexistent_user"}
+{"ts": "2026-10-24T02:08:17", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-24T02:08:18", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "alice"}
+{"ts": "2026-10-24T02:08:18", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:08:18", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: GET http://testserver/api/me \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:08:18", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/logout \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:08:18", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: GET http://testserver/api/me \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:08:18", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-24T02:08:18", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "carol"}
+{"ts": "2026-10-24T02:08:18", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:08:19", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:08:24", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T02:08:24", "level": "WARNING", "logger": "google_genai.models", "message": "Direct use of automatic function calling (AFC) in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream. Similarly, direct use of AFC in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message."}
+{"ts": "2026-10-24T02:08:25", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:streamGenerateContent?alt=sse \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:08:26", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "bob"}
+{"ts": "2026-10-24T02:08:26", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:08:27", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:08:30", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:08:30", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/logout \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:09:05", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-24T02:09:05", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages/stream \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-24T02:09:05", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: GET http://testserver/api/me \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:09:06", "level": "WARNING", "logger": "ui.server", "message": "login failed for username=alice", "username": "alice"}
+{"ts": "2026-10-24T02:09:06", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-24T02:09:06", "level": "WARNING", "logger": "ui.server", "message": "login failed for username=nonexistent_user", "username": "nonexistent_user"}
+{"ts": "2026-10-24T02:09:06", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-24T02:09:06", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "alice"}
+{"ts": "2026-10-24T02:09:06", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:09:06", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: GET http://testserver/api/me \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:09:06", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/logout \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:09:06", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: GET http://testserver/api/me \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:09:06", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-24T02:09:06", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "carol"}
+{"ts": "2026-10-24T02:09:06", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:09:08", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:09:12", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T02:09:12", "level": "WARNING", "logger": "google_genai.models", "message": "Direct use of automatic function calling (AFC) in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream. Similarly, direct use of AFC in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message."}
+{"ts": "2026-10-24T02:09:13", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:streamGenerateContent?alt=sse \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:09:14", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "bob"}
+{"ts": "2026-10-24T02:09:14", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:09:15", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:09:18", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:09:18", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/logout \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:10:01", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-24T02:10:01", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages/stream \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-24T02:10:01", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: GET http://testserver/api/me \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:10:01", "level": "WARNING", "logger": "ui.server", "message": "login failed for username=alice", "username": "alice"}
+{"ts": "2026-10-24T02:10:01", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-24T02:10:01", "level": "WARNING", "logger": "ui.server", "message": "login failed for username=nonexistent_user", "username": "nonexistent_user"}
+{"ts": "2026-10-24T02:10:01", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-24T02:10:01", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "alice"}
+{"ts": "2026-10-24T02:10:01", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:10:01", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: GET http://testserver/api/me \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:10:01", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/logout \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:10:01", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: GET http://testserver/api/me \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:10:01", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-24T02:10:02", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "carol"}
+{"ts": "2026-10-24T02:10:02", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:10:03", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:10:08", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T02:10:08", "level": "WARNING", "logger": "google_genai.models", "message": "Direct use of automatic function calling (AFC) in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream. Similarly, direct use of AFC in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message."}
+{"ts": "2026-10-24T02:10:09", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:streamGenerateContent?alt=sse \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:10:09", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:10:09", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: GET http://testserver/api/sessions/f5fae0c2-1881-4c5c-bbc9-91fb34bd819f/turns \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:10:09", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/logout \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:10:10", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "bob"}
+{"ts": "2026-10-24T02:10:10", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:10:11", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:10:15", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T02:10:16", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:streamGenerateContent?alt=sse \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:10:16", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:10:16", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/logout \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:12:02", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "dave"}
+{"ts": "2026-10-24T02:12:04", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:12:09", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T02:12:09", "level": "WARNING", "logger": "google_genai.models", "message": "Direct use of automatic function calling (AFC) in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream. Similarly, direct use of AFC in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message."}
+{"ts": "2026-10-24T02:12:10", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:streamGenerateContent?alt=sse \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:17:50", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-24T02:17:50", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages/stream \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-24T02:17:50", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: GET http://testserver/api/me \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:17:51", "level": "WARNING", "logger": "ui.server", "message": "login failed for username=alice", "username": "alice"}
+{"ts": "2026-10-24T02:17:51", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-24T02:17:51", "level": "WARNING", "logger": "ui.server", "message": "login failed for username=nonexistent_user", "username": "nonexistent_user"}
+{"ts": "2026-10-24T02:17:51", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-24T02:17:51", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "alice"}
+{"ts": "2026-10-24T02:17:51", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:17:51", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: GET http://testserver/api/me \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:17:51", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/logout \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:17:51", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: GET http://testserver/api/me \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:17:51", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-24T02:17:51", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "carol"}
+{"ts": "2026-10-24T02:17:51", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:17:54", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:17:58", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T02:17:58", "level": "WARNING", "logger": "google_genai.models", "message": "Direct use of automatic function calling (AFC) in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream. Similarly, direct use of AFC in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message."}
+{"ts": "2026-10-24T02:17:59", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:streamGenerateContent?alt=sse \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:17:59", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:17:59", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: GET http://testserver/api/sessions/096f86e7-b6dd-4e81-a2d5-cb3895926422/turns \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:17:59", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/logout \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:18:00", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "bob"}
+{"ts": "2026-10-24T02:18:00", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:18:00", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:18:04", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-24T02:18:05", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:streamGenerateContent?alt=sse \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:18:05", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:18:05", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/logout \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T02:19:08", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "dave"}
+{"ts": "2026-10-24T02:19:09", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T12:08:38", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "dave"}
+{"ts": "2026-10-24T12:13:55", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "dave"}
+{"ts": "2026-10-24T12:17:28", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "dave"}
+{"ts": "2026-10-25T15:36:06", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "dave"}
+{"ts": "2026-10-25T16:09:00", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "dave"}
+{"ts": "2026-10-25T16:14:51", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-25T16:14:51", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages/stream \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-25T16:14:51", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: GET http://testserver/api/me \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-25T16:14:51", "level": "WARNING", "logger": "ui.server", "message": "login failed for username=alice", "username": "alice"}
+{"ts": "2026-10-25T16:14:51", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-25T16:14:51", "level": "WARNING", "logger": "ui.server", "message": "login failed for username=nonexistent_user", "username": "nonexistent_user"}
+{"ts": "2026-10-25T16:14:51", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-25T16:14:51", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "alice"}
+{"ts": "2026-10-25T16:14:51", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-25T16:14:51", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: GET http://testserver/api/me \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-25T16:14:51", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/logout \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-25T16:14:51", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: GET http://testserver/api/me \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-25T16:14:51", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-25T16:14:51", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "carol"}
+{"ts": "2026-10-25T16:14:51", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-25T16:14:52", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-25T16:14:58", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-25T16:14:58", "level": "WARNING", "logger": "google_genai.models", "message": "Direct use of automatic function calling (AFC) in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream. Similarly, direct use of AFC in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message."}
+{"ts": "2026-10-25T16:14:59", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:streamGenerateContent?alt=sse \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-25T16:14:59", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-25T16:14:59", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: GET http://testserver/api/sessions/cfae4be6-c597-40f5-ad86-acaf093695e6/turns \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-25T16:14:59", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/logout \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-25T16:14:59", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "bob"}
+{"ts": "2026-10-25T16:14:59", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-25T16:15:00", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-25T16:15:03", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-25T16:15:03", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/logout \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-25T16:17:44", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "dave"}
+{"ts": "2026-10-25T16:17:52", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-25T16:18:45", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-25T16:18:45", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages/stream \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-25T16:18:45", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: GET http://testserver/api/me \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-25T16:18:45", "level": "WARNING", "logger": "ui.server", "message": "login failed for username=alice", "username": "alice"}
+{"ts": "2026-10-25T16:18:45", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-25T16:18:45", "level": "WARNING", "logger": "ui.server", "message": "login failed for username=nonexistent_user", "username": "nonexistent_user"}
+{"ts": "2026-10-25T16:18:45", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-25T16:18:45", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "alice"}
+{"ts": "2026-10-25T16:18:45", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-25T16:18:45", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: GET http://testserver/api/me \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-25T16:18:45", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/logout \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-25T16:18:45", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: GET http://testserver/api/me \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-25T16:18:45", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages \"HTTP/1.1 401 Unauthorized\""}
+{"ts": "2026-10-25T16:18:46", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "carol"}
+{"ts": "2026-10-25T16:18:46", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-25T16:18:47", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-25T16:18:51", "level": "INFO", "logger": "google_genai.models", "message": "AFC is enabled with max remote calls: 10."}
+{"ts": "2026-10-25T16:18:51", "level": "WARNING", "logger": "google_genai.models", "message": "Direct use of automatic function calling (AFC) in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream. Similarly, direct use of AFC in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message."}
+{"ts": "2026-10-25T16:18:52", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:streamGenerateContent?alt=sse \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-25T16:18:53", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-25T16:18:53", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: GET http://testserver/api/sessions/3f47d251-b2e1-456f-8c96-b30bfdf9cdfd/turns \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-25T16:18:53", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/logout \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-25T16:18:53", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "bob"}
+{"ts": "2026-10-25T16:18:53", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/login \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-25T16:18:54", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-25T16:18:57", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/messages \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-25T16:18:57", "level": "INFO", "logger": "httpx2", "message": "HTTP Request: POST http://testserver/api/logout \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-25T16:59:50", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "alice"}
+{"ts": "2026-10-25T17:30:54", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "alice"}
+{"ts": "2026-10-25T17:49:58", "level": "INFO", "logger": "ui.server", "message": "guest login succeeded", "username": "bob-guest-d8f6a090"}
+{"ts": "2026-10-25T17:50:06", "level": "INFO", "logger": "ui.server", "message": "guest login succeeded", "username": "dave-guest-cb78d98c"}
+{"ts": "2026-10-25T17:51:51", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "admin"}
+{"ts": "2026-10-25T17:59:12", "level": "INFO", "logger": "ui.server", "message": "guest login succeeded", "username": "alice-guest-bd1d28ce"}
+{"ts": "2026-10-25T17:59:13", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-25T17:59:26", "level": "INFO", "logger": "ui.server", "message": "guest login succeeded", "username": "alice-guest-9e605a67"}
+{"ts": "2026-10-25T17:59:34", "level": "INFO", "logger": "ui.server", "message": "login succeeded", "username": "admin"}
+{"ts": "2026-10-25T18:14:00", "level": "INFO", "logger": "ui.server", "message": "guest login succeeded", "username": "alice-guest-b1a3920c"}

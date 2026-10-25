@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./.venv/Scripts/python.exe -c ' *)",
+      "Bash(node --check evals_script_check.js)",
+      "Bash(rm evals_script_check.js)"
+    ]
+  }
+}

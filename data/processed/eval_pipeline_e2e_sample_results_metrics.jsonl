@@ -1,0 +1,13 @@
+{"query_id": "A01", "letter": "A", "unanswerable": false, "issues": [], "stopped_at": "ok", "hit_rank": 1, "trap_beat_real": null, "modes": ["candidates_only"], "failed": false}
+{"query_id": "A02", "letter": "A", "unanswerable": false, "issues": [], "stopped_at": "ok", "hit_rank": 1, "trap_beat_real": null, "modes": ["synthesized"], "failed": false}
+{"query_id": "B02", "letter": "B", "unanswerable": true, "issues": [], "stopped_at": "ok", "hit_rank": null, "trap_beat_real": null, "modes": ["candidates_only"], "failed": false}
+{"query_id": "B06", "letter": "B", "unanswerable": false, "issues": [], "stopped_at": "ok", "hit_rank": 2, "trap_beat_real": null, "modes": ["candidates_only", "candidates_only"], "failed": false}
+{"query_id": "C03", "letter": "C", "unanswerable": false, "issues": [], "stopped_at": "ok", "hit_rank": 1, "trap_beat_real": null, "modes": ["candidates_only"], "failed": false}
+{"query_id": "C05", "letter": "C", "unanswerable": false, "issues": [], "stopped_at": "ok", "hit_rank": null, "trap_beat_real": null, "modes": ["candidates_only"], "failed": false}
+{"query_id": "D04", "letter": "D", "unanswerable": false, "issues": [], "stopped_at": "ok", "hit_rank": null, "trap_beat_real": null, "modes": ["candidates_only"], "failed": false}
+{"query_id": "D05", "letter": "D", "unanswerable": true, "issues": [], "stopped_at": "ok", "hit_rank": null, "trap_beat_real": null, "modes": ["candidates_only"], "failed": false}
+{"query_id": "E01", "letter": "E", "unanswerable": true, "issues": [], "stopped_at": "ok", "hit_rank": null, "trap_beat_real": null, "modes": ["candidates_only"], "failed": false}
+{"query_id": "F03", "letter": "F", "unanswerable": false, "issues": [], "stopped_at": "ok", "hit_rank": 1, "trap_beat_real": null, "modes": ["candidates_only"], "failed": false}
+{"query_id": "G01", "letter": "G", "unanswerable": false, "issues": [], "stopped_at": "ok", "hit_rank": 2, "trap_beat_real": null, "modes": ["candidates_only"], "failed": false}
+{"query_id": "E10", "letter": "E", "unanswerable": false, "issues": [], "stopped_at": "ok", "hit_rank": 1, "trap_beat_real": false, "modes": ["synthesized"], "failed": false}
+{"query_id": "F10", "letter": "F", "unanswerable": false, "issues": [], "stopped_at": "ok", "hit_rank": 1, "trap_beat_real": null, "modes": ["candidates_only"], "failed": false}
