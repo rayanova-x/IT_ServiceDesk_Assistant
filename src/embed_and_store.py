@@ -87,7 +87,17 @@ print(f"Total: {len(chunks)} chunks from {len(SOURCE_FILES)} source connectors")
 texts = [c["text"] for c in chunks]
 
 import numpy as np
-embeddings = [np.asarray(e) for e in model.embed(texts, batch_size=32)]
+# Explicit per-item progress print (2026-10-25, deployment diagnosis): on
+# a CPU-starved free-tier host (e.g. Render's 0.1 vCPU), this step can
+# take far longer than it does locally -- previously this printed NOTHING
+# until all 299 chunks finished, which was indistinguishable in the
+# deploy log from a hung/crashed process. Printing every 50 chunks proves
+# forward progress is actually happening, not just a cosmetic nicety.
+embeddings = []
+for i, e in enumerate(model.embed(texts, batch_size=32), start=1):
+    embeddings.append(np.asarray(e))
+    if i % 50 == 0 or i == len(texts):
+        print(f"  embedded {i}/{len(texts)} chunks...")
 # BGE ONNX models from fastembed are already L2-normalized, but we
 # normalize explicitly so cosine similarity behaves correctly regardless.
 embeddings = [e / np.linalg.norm(e) for e in embeddings]

@@ -1,12 +1,16 @@
 #!/bin/sh
-# Hugging Face Spaces' disk is ephemeral -- every redeploy/restart starts
-# from a blank filesystem, so the Chroma index, the embedding/reranker
-# model cache, and sessions.db (staff accounts, demo sessions) all get
-# rebuilt here on boot rather than being treated as persistent state.
-# This is the SAME rebuild-from-source-of-truth pattern embed_and_store.py
-# already does locally (delete-then-recreate the Chroma collection every
-# run, see its own comment on why) -- boot time just makes it happen
-# automatically instead of requiring a manual re-run.
+# Render's (and most free-tier container hosts') disk is ephemeral --
+# every redeploy/restart starts from a blank filesystem, so the Chroma
+# index and sessions.db (staff accounts, demo sessions) get rebuilt here
+# on boot rather than being treated as persistent state. This is the SAME
+# rebuild-from-source-of-truth pattern embed_and_store.py already does
+# locally (delete-then-recreate the Chroma collection every run, see its
+# own comment on why) -- boot time just makes it happen automatically
+# instead of requiring a manual re-run.
+#
+# The ML models themselves are NOT downloaded here -- see the Dockerfile's
+# pre-download RUN step, baked into the image at build time instead, so a
+# container restart/wake-up doesn't re-download ~300MB every time.
 #
 # Deliberately does NOT run seed_jira_tickets.py: that's a one-off script
 # that creates NEW tickets in a real Jira project via the live API --
@@ -16,7 +20,7 @@
 # rebuild locally for that part.
 set -e
 
-echo "Building Chroma vector index from data/chunks/ (ephemeral disk, rebuilt every boot)..."
+echo "Building Chroma vector index from data/chunks/ (ephemeral disk, rebuilt every boot; models already cached from build)..."
 python src/embed_and_store.py
 
 echo "Seeding staff accounts (idempotent upsert, safe to re-run)..."

@@ -1,0 +1,8 @@
+# docker-entrypoint.sh MUST stay LF -- a Windows checkout with CRLF line
+# endings breaks its shebang (#!/bin/sh\r is invalid in a Linux
+# container), causing an immediate, confusing boot failure that looks
+# nothing like a line-ending problem. Pinned here rather than relying on
+# core.autocrlf, which converts based on a local git config setting that
+# isn't guaranteed consistent across machines/clones.
+docker-entrypoint.sh text eol=lf
+Dockerfile text eol=lf
