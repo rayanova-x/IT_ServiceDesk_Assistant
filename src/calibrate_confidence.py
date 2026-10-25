@@ -85,6 +85,12 @@ def main():
     client = chromadb.PersistentClient(path=str(CHROMA_DB_PATH))
     collection = client.get_collection("it_helpdesk_kb")
     model = TextEmbedding(model_name="BAAI/bge-small-en-v1.5", cache_dir=str(MODEL_CACHE_DIR))
+    # Deliberately hardcoded, NOT config.RERANKER_MODEL_NAME -- the 2.0
+    # confidence threshold in step8_confidence.py was calibrated against
+    # THIS specific model's score distribution. A deployment may run a
+    # lighter reranker for RAM reasons (see config.py), but that threshold
+    # has not been re-derived for it -- this script must keep measuring
+    # against the model the existing threshold actually means.
     reranker = TextCrossEncoder(model_name="BAAI/bge-reranker-base", cache_dir=str(MODEL_CACHE_DIR))
 
     subcat_to_page = load_confluence_lookup()

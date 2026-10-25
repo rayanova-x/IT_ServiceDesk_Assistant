@@ -312,6 +312,13 @@ def main():
     client = chromadb.PersistentClient(path=str(CHROMA_DB_PATH))
     collection = client.get_collection("it_helpdesk_kb")
     model = TextEmbedding(model_name="BAAI/bge-small-en-v1.5", cache_dir=str(MODEL_CACHE_DIR))
+    # Deliberately hardcoded, NOT config.RERANKER_MODEL_NAME: this script
+    # defines what every golden-set/retrieval-eval number in this project
+    # MEANS. A deployment can run a lighter reranker for RAM reasons (see
+    # config.py's docstring), but the eval harness itself must stay pinned
+    # to the model those existing numbers were actually measured against,
+    # or re-running this would silently produce numbers that look
+    # comparable but aren't.
     reranker = TextCrossEncoder(model_name="BAAI/bge-reranker-base", cache_dir=str(MODEL_CACHE_DIR))
 
     subcat_to_page = load_confluence_lookup()

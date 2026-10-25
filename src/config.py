@@ -43,3 +43,19 @@ MODEL_CACHE_DIR = _path_from_env("MODEL_CACHE_DIR", REPO_ROOT / "local_model_cac
 SESSION_DB_PATH = _path_from_env("SESSION_DB_PATH", REPO_ROOT / "sessions.db")
 LOG_DIR = _path_from_env("LOG_DIR", REPO_ROOT / "logs")
 DATA_DIR = _path_from_env("DATA_DIR", REPO_ROOT / "data")
+
+# Reranker model (2026-10-25, deployment constraint): BAAI/bge-reranker-base
+# is the model every existing eval number, golden-set score, and the Step 8
+# confidence threshold (2.0, see step8_confidence.py) was measured against
+# -- that's still the correct default for local dev. It loads at ~1.2GB RSS
+# though (measured directly, not estimated), which doesn't fit a free-tier
+# host like Render's 512MB web service. RERANKER_MODEL_NAME lets a
+# deployment set RERANKER_MODEL="Xenova/ms-marco-MiniLM-L-6-v2" (measured
+# ~290MB RSS total with the embedding model) via an env var instead of
+# editing code -- same "move this to a server is a config change" pattern
+# as every other var in this file. Scores from the two models are NOT on
+# the same scale: a deployment using the lighter model will show different
+# raw confidence numbers than the 2.0-calibrated ones in this project's
+# eval history, which was never re-run against it (a known, explicitly
+# accepted gap -- see README_DEPLOY.md).
+RERANKER_MODEL_NAME = os.environ.get("RERANKER_MODEL", "BAAI/bge-reranker-base")

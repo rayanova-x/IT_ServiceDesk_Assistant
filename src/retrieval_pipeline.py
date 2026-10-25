@@ -7,8 +7,10 @@ Two end-to-end entry points, both tested by eval_retrieval.py:
   - hybrid_search(): BM25 + dense -> RRF fusion -> top-N. Simpler, no
     reranker model needed.
   - hybrid_search_reranked(): same, but widens the candidate pool and
-    re-sorts with a local cross-encoder (BAAI/bge-reranker-base) before
-    the top-N cutoff. USE THIS ONE for any new code -- measured 2026-09-13
+    re-sorts with a local cross-encoder (BAAI/bge-reranker-base by
+    default -- see config.RERANKER_MODEL_NAME for the deployment-only
+    lighter-model override) before the top-N cutoff. USE THIS ONE for
+    any new code -- measured 2026-09-13
     to beat hybrid_search() on every metric with no regressions (combined
     top-1 accuracy 45.9% -> 58.2%, confuser-trap rate 75% -> 50%). See
     PROJECT_HANDOFF.md Section 8 for the full before/after numbers and
@@ -283,10 +285,13 @@ def hybrid_search(query: str, collection, model, error_codes: list[str] = None,
 # ("I'll fine-tune the embedding model" is called out as low-value for this;
 # reranking and hybrid retrieval are the recommended levers).
 #
-# Uses fastembed's local TextCrossEncoder (BAAI/bge-reranker-base, same
-# cache_dir convention as the embedding model -- never the OS temp folder,
-# per PROJECT_HANDOFF.md Section 6 bug #4). Fully local, no third-party API,
-# consistent with Section 1's hard constraint.
+# Uses fastembed's local TextCrossEncoder (BAAI/bge-reranker-base by
+# default, same cache_dir convention as the embedding model -- never the
+# OS temp folder, per PROJECT_HANDOFF.md Section 6 bug #4). Fully local,
+# no third-party API, consistent with Section 1's hard constraint --
+# config.RERANKER_MODEL_NAME's deployment override swaps the MODEL, not
+# the "local-only" property; the lighter model is still fastembed/ONNX,
+# still fully local.
 # ---------------------------------------------------------------------------
 RERANK_CANDIDATE_POOL = 20
 

@@ -7,3 +7,5 @@ __pycache__/
 outputs/
 data/processed/chroma_contents.csv
 sessions.db
+logs/
+server_log_restart.txt

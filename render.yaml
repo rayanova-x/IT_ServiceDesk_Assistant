@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: it-helpdesk-rag-assistant
+    runtime: docker
+    plan: free
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        sync: false
+      - key: GEMINI_JUDGE_MODEL
+        sync: false
+      - key: GEMINI_STRONG_JUDGE_MODEL
+        sync: false
+      - key: JIRA_SITE_URL
+        sync: false
+      - key: JIRA_EMAIL
+        sync: false
+      - key: JIRA_API_TOKEN
+        sync: false
+      - key: JIRA_PROJECT_KEY
+        sync: false

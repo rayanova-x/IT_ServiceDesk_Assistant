@@ -37,24 +37,30 @@ CUSTOM_CASES_PATH = DATA_PROCESSED / "eval_custom_cases.jsonl"
 META_PATH = DATA_PROCESSED / "golden_set_meta.json"
 RUN_LOG_PATH = DATA_PROCESSED / "eval_run_log.jsonl"
 
-# Same model identifiers eval_retrieval.py actually constructs (kept here
-# as the single source of truth for change-detection, not re-derived from
-# a live model object -- see get_model_version()'s docstring).
+# Embedding model name: hardcoded, matching eval_retrieval.py's own
+# hardcoded choice (see that script's comment on why it's deliberately
+# NOT config.RERANKER_MODEL_NAME) -- the embedding model has no
+# deployment override, only the reranker does.
 EMBEDDING_MODEL_NAME = "BAAI/bge-small-en-v1.5"
-RERANKER_MODEL_NAME = "BAAI/bge-reranker-base"
 
 
 def get_model_version() -> str:
     """
     A short string identifying the retrieval models a golden-eval run
     used -- embedding model + reranker, the two real pipeline components
-    eval_retrieval.py.score_query() exercises. Hardcoded to match the
-    literal strings eval_retrieval.py passes to TextEmbedding/
-    TextCrossEncoder (see its own imports) rather than introspecting a
-    live model object, since this needs to be comparable WITHOUT loading
-    the models (the whole point of change-detection is skipping that
-    costly load when nothing changed).
+    run_golden_set_retrieval_eval() actually exercises (via the real,
+    already-built PipelineClients it's called with, see that function).
+
+    The reranker name is read from config.RERANKER_MODEL_NAME, NOT a
+    second hardcoded constant here -- run_golden_set_retrieval_eval()
+    uses whatever reranker the live server's PipelineClients actually
+    loaded (config.RERANKER_MODEL_NAME's deployment override), so this
+    string must track that SAME value or change-detection would silently
+    lie: a deployment that swapped rerankers for RAM reasons would keep
+    reporting the old model's name here and never trigger a re-run even
+    though the real scores just changed models.
     """
+    from config import RERANKER_MODEL_NAME
     return f"{EMBEDDING_MODEL_NAME}|{RERANKER_MODEL_NAME}"
 
 
