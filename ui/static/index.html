@@ -264,6 +264,18 @@
   .chat-inner { display: flex; flex-direction: column; }
   .empty-state { text-align: center; color: var(--text-muted); margin-top: 20%; font-size: 13px; }
 
+  .ticket-context-card {
+    background: var(--accent-soft); border: var(--border-w) solid var(--border); border-radius: 12px;
+    padding: 12px 14px; margin-bottom: 14px; font-size: 13px; line-height: 1.45;
+  }
+  .ticket-context-card .ctx-title { font-weight: 700; margin-bottom: 4px; }
+  .ticket-context-card .ctx-hint { color: var(--text-muted); margin: 6px 0 10px; }
+  .ticket-context-card .suggest-btn {
+    background: var(--bubble-user); color: white; border: var(--border-w) solid var(--border); border-radius: 9px;
+    padding: 7px 14px; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: var(--shadow);
+  }
+  .ticket-context-card .suggest-btn:disabled { background: #cdd8ee; color: rgba(22,22,22,0.5); cursor: default; box-shadow: none; }
+
   .msg-row { display: flex; margin-bottom: 14px; }
   .msg-row.user { justify-content: flex-end; }
   .bubble {
@@ -701,11 +713,11 @@ function renderTicketDetail(detail) {
 }
 
 async function acceptTicket(issueKey, summary) {
-  // "Accept" is the explicit commit action -- this is what actually
-  // seeds the session (fetches the real ticket content from Jira,
-  // feeds it through the real pipeline as the first turn). Re-renders
-  // the detail panel afterward so the Accept button becomes "Accepted".
-  openOrFocusTicketChat(issueKey, summary, /*alreadySeeded*/ false);
+  // "Accept" is the explicit commit action -- it loads the real ticket
+  // from Jira into the session as background context only (no answer
+  // yet). Re-renders the detail panel afterward so the Accept button
+  // becomes "Accepted".
+  await openOrFocusTicketChat(issueKey, summary, /*alreadySeeded*/ false);
   loadTickets();
   if (selectedTicketKey === issueKey) {
     const res = await fetch(`/api/tickets/${issueKey}`);
@@ -735,7 +747,7 @@ function openOrFocusTicketChat(issueKey, title, alreadySeeded, sessionNumber = 1
   // later ones, never a random UUID) -- set it immediately,
   // synchronously, rather than waiting for a server round-trip to
   // report it back. Fixes two real bugs found 2026-10-24: (1) typing
-  // fast enough to send a message before seedTicketSession's async call
+  // fast enough to send a message before loadTicketContext's async call
   // completed sent session_id=null, which the server silently turned
   // into a brand-new disconnected random session (the window kept
   // showing the ticket's header throughout, so this was invisible --
@@ -744,12 +756,11 @@ function openOrFocusTicketChat(issueKey, title, alreadySeeded, sessionNumber = 1
   // ticket) never set chat.sessionId AT ALL, so every message in a
   // reopened ticket window hit the same bug, not just the first one.
   openChats[chatId].sessionId = ticketSessionId(issueKey, sessionNumber);
-  if (alreadySeeded) {
-    replayTicketSession(chatId, issueKey, sessionNumber);
-  } else {
-    seedTicketSession(chatId, issueKey, title, sessionNumber);
-  }
+  const ready = alreadySeeded
+    ? replayTicketSession(chatId, issueKey, sessionNumber)
+    : loadTicketContext(chatId, issueKey, title, sessionNumber);
   loadSessionSwitcherMenu(chatId, issueKey);
+  return ready;
 }
 
 function ticketSessionId(issueKey, sessionNumber = 1) {
@@ -825,17 +836,17 @@ async function switchTicketSession(chatId, sessionNumber, isNew = false) {
   input.placeholder = 'Loading…';
 
   if (isNew) {
-    await seedTicketSession(chatId, chat.ticketKey, chat.title, sessionNumber);
+    await loadTicketContext(chatId, chat.ticketKey, chat.title, sessionNumber);
   } else {
     const res = await fetch(`/api/tickets/${chat.ticketKey}/session?session_number=${sessionNumber}`);
     const turns = res.ok ? await res.json() : [];
     if (turns.length > 0) {
       await replayTicketSession(chatId, chat.ticketKey, sessionNumber);
     } else {
-      // A listed-but-never-seeded session (shouldn't normally happen
+      // A listed-but-never-loaded session (shouldn't normally happen
       // via the switcher, since the list only offers real/new sessions,
-      // but handled defensively) -- seed it same as "start new."
-      await seedTicketSession(chatId, chat.ticketKey, chat.title, sessionNumber);
+      // but handled defensively) -- load it same as "start new."
+      await loadTicketContext(chatId, chat.ticketKey, chat.title, sessionNumber);
     }
   }
   loadSessionSwitcherMenu(chatId, chat.ticketKey);
@@ -903,7 +914,7 @@ function createChatWindow(chatId, { ticketKey, title, isFreeform }) {
   sendBtn.addEventListener('click', () => sendMessageInChat(chatId));
 
   // Real bug fixed 2026-10-24: a ticket chat's sessionId starts null and
-  // is only set once seedTicketSession()/replayTicketSession() gets its
+  // is only set once loadTicketContext()/replayTicketSession() gets its
   // first response back. Typing fast enough to send BEFORE that
   // completes sent session_id=null to the server, which silently minted
   // a brand-new random/freeform session disconnected from the ticket --
@@ -1274,6 +1285,7 @@ async function replayTicketSession(chatId, issueKey, sessionNumber = 1) {
   const res = await fetch(`/api/tickets/${issueKey}/session?session_number=${sessionNumber}`);
   const turns = res.ok ? await res.json() : [];
   clearEmptyState(chatId);
+  if (!turns.length) addTicketContextCard(chatId, issueKey, openChats[chatId].title);
   turns.forEach(t => {
     addUserBubble(chatId, t.raw_text);
     if (t.stopped_at === 'ok') {
@@ -1289,45 +1301,44 @@ async function replayTicketSession(chatId, issueKey, sessionNumber = 1) {
   enableComposer(chatId);
 }
 
-async function seedTicketSession(chatId, issueKey, ticketSummary, sessionNumber = 1) {
+function addTicketContextCard(chatId, issueKey, summary) {
+  clearEmptyState(chatId);
+  const card = document.createElement('div');
+  card.className = 'ticket-context-card';
+  const title = document.createElement('div');
+  title.className = 'ctx-title';
+  title.textContent = `${issueKey} loaded as context`;
+  const sum = document.createElement('div');
+  sum.textContent = summary;
+  const hint = document.createElement('div');
+  hint.className = 'ctx-hint';
+  hint.textContent = 'Ask what you need about this ticket, or get a suggestion straight away.';
+  const btn = document.createElement('button');
+  btn.className = 'suggest-btn';
+  btn.textContent = 'Suggest SOP';
+  btn.onclick = () => {
+    btn.disabled = true;
+    openChats[chatId].el.querySelector('.composer-input').value =
+      'Suggest the most relevant SOP and fix for this ticket.';
+    sendMessageInChat(chatId);
+  };
+  card.append(title, sum, hint, btn);
+  chatInnerOf(chatId).appendChild(card);
+}
+
+async function loadTicketContext(chatId, issueKey, ticketSummary, sessionNumber = 1) {
   const chat = openChats[chatId];
-  addUserBubble(chatId, `Ticket ${issueKey}: ${ticketSummary}`);
-  addThinkingBubble(chatId);
-
-  const shells = {};
-  let removedThinking = false;
+  const input = chat.el.querySelector('.composer-input');
+  const sendBtn = chat.el.querySelector('.send-btn');
+  input.disabled = true;
+  sendBtn.disabled = true;
   try {
-    const res = await fetch(`/api/tickets/${issueKey}/open/stream?session_number=${sessionNumber}`, { method: 'POST' });
-    if (res.status === 401) { removeThinkingBubble(chatId); showLoginOverlay(); return; }
-    if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
-
-    await readSSE(res, (eventName, data) => {
-      if (eventName === 'meta') {
-        chat.sessionId = data.session_id;
-      } else if (eventName === 'turn_start') {
-        if (!removedThinking) { removeThinkingBubble(chatId); removedThinking = true; }
-        const shell = addAssistantTurnShell(chatId, data.turn);
-        shells[data.turn_index] = { ...shell, turn: data.turn, text: '' };
-      } else if (eventName === 'turn_delta') {
-        const s = shells[data.turn_index];
-        if (!s) return;
-        s.text += data.delta;
-        s.textDiv.textContent = s.text;
-        scrollChatToBottom(chatId);
-      } else if (eventName === 'turn_end') {
-        const s = shells[data.turn_index];
-        if (!s) return;
-        // See the typed-message handler's identical comment above --
-        // data.turn carries citations/caveat/staleness only for a
-        // synthesized answer, merged over the turn_start payload.
-        const finalTurn = data.turn ? { ...s.turn, ...data.turn } : s.turn;
-        finishAssistantTurn(chatId, s.row, { ...finalTurn, answer_text: s.text });
-      }
-    });
-    loadMonitoring();
+    const res = await fetch(`/api/tickets/${issueKey}/context?session_number=${sessionNumber}`, { method: 'POST' });
+    if (res.status === 401) { showLoginOverlay(); return; }
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    addTicketContextCard(chatId, issueKey, ticketSummary);
   } catch (err) {
-    if (!removedThinking) removeThinkingBubble(chatId);
-    addAssistantTurn(chatId, { answer_text: 'Error opening ticket: ' + err, mode: null });
+    addAssistantTurn(chatId, { answer_text: 'Error loading ticket: ' + err, mode: null });
   } finally {
     enableComposer(chatId);
   }

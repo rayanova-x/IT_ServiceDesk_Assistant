@@ -262,6 +262,23 @@ def run_pipeline(raw_message: str, clients: PipelineClients,
         # 4's ambiguity gate (see original comment, still true): a clear
         # category can still get weak search results.
         confidence = check_confidence(search_results, category=gate.search_category)
+        category_used = gate.search_category
+        if category_used is not None and not confidence.confident:
+            # The category is the router's one-line guess and a hard filter: a
+            # question about a policy or a neighbouring topic can live in
+            # another category. Retry once across all categories and keep it
+            # only if it clears the same confidence bar.
+            wide = apply_recency_rerank(
+                hybrid_search_reranked(
+                    call.query, clients.chroma_collection, clients.embedding_model,
+                    clients.reranker, error_codes=call_error_codes, category=None,
+                    allowed_groups=allowed_groups,
+                ),
+                call.wants_latest,
+            )
+            wide_confidence = check_confidence(wide, category=None)
+            if wide_confidence.confident:
+                search_results, confidence, category_used = wide, wide_confidence, None
         timer.mark("step8_confidence")
         low_confidence = gate.low_confidence or not confidence.confident
         # Which signal actually caused it, for the user-facing message --
@@ -286,7 +303,7 @@ def run_pipeline(raw_message: str, clients: PipelineClients,
 
         results.append(PipelineResult(
             sub_query=call.query,
-            category_used=gate.search_category,
+            category_used=category_used,
             low_confidence=low_confidence,
             search_results=search_results,
             access_denial=denial,
@@ -295,6 +312,8 @@ def run_pipeline(raw_message: str, clients: PipelineClients,
             confidence_threshold=confidence.threshold_used,
         ))
 
+    results = _merge_same_question(results, [c.same_question for c in route.search_calls])
+
     return PipelineOutcome(
         stopped_at="ok",
         error_codes=sorted(all_error_codes_overall),
@@ -302,6 +321,45 @@ def run_pipeline(raw_message: str, clients: PipelineClients,
         results=results,
         stage_latency_ms=timer.marks,
     )
+
+
+def _merge_same_question(results: list[PipelineResult], same_flags: list[bool]) -> list[PipelineResult]:
+    """
+    Search calls flagged same_question are parts of ONE question (e.g. the
+    two sides of a comparison): pool their excerpts into a single result so
+    it is answered together, not as separate turns each seeing half the
+    evidence. Only confident parts are pooled (a weak part would add
+    decoy-prone noise); if every part is weak the merged result is weak too.
+    """
+    group = [r for r, same in zip(results, same_flags) if same]
+    if len(group) < 2:
+        return results
+    low = all(r.low_confidence for r in group)
+    lead = next((r for r in group if not r.low_confidence), group[0])
+    pooled, seen = [], set()
+    for r in (group if low else [r for r in group if not r.low_confidence]):
+        for sr in r.search_results:
+            if sr["chunk_id"] not in seen:
+                seen.add(sr["chunk_id"])
+                pooled.append(sr)
+    merged = PipelineResult(
+        sub_query=" + ".join(r.sub_query for r in group),
+        category_used=lead.category_used,
+        low_confidence=low,
+        search_results=pooled,
+        access_denial=next((r.access_denial for r in group if r.access_denial), None),
+        low_confidence_reason=lead.low_confidence_reason if low else None,
+        confidence_top_score=lead.confidence_top_score,
+        confidence_threshold=lead.confidence_threshold,
+    )
+    out, placed = [], False
+    for r, same in zip(results, same_flags):
+        if not same:
+            out.append(r)
+        elif not placed:
+            out.append(merged)
+            placed = True
+    return out
 
 
 if __name__ == "__main__":

@@ -20,6 +20,7 @@ import live_events
 import session_store
 from gemini_retry import GeminiUnavailableError
 from pii_redaction import redact_for_storage
+from prompt_delimiting import wrap_untrusted
 from pipeline import PipelineClients, run_pipeline
 from step0_context import ConversationState
 from step9_generation import StreamInterrupted, generate_answer_streaming
@@ -84,79 +85,29 @@ def ticket_session_id(issue_key: str, session_number: int = 1) -> str:
     return base if session_number <= 1 else f"{base}::{session_number}"
 
 
-def start_or_resume_ticket_session_streaming(
+def load_ticket_context(
     issue_key: str,
     conversation_state: ConversationState,
-    clients: PipelineClients,
-    allowed_groups: set[str] | None = None,
     session_number: int = 1,
-):
+) -> dict:
     """
-    Streaming counterpart to start_or_resume_ticket_session() -- see
-    stream_message()'s own docstring for the real-streaming design. Same
-    message_source="ticket" reasoning as the non-streaming version.
-
-    session_number: which of this ticket's (possibly several) sessions
-    to seed -- see ticket_session_id()'s own docstring for the real
-    product feature this serves ("start a new session on this ticket").
-    Always re-seeds with the SAME ticket content regardless of
-    session_number (a fresh session on the same ticket still needs the
-    ticket's real description/comments as its first message) -- the
-    caller is responsible for only calling this when session_number is
-    genuinely new/unseeded, same idempotency contract as before.
-
-    Deliberately NOT a generator function itself (no `yield` in this
-    function's own body) -- the Jira fetch (jira_client.get_issue(),
-    which can raise JiraFetchError) runs EAGERLY here, before returning,
-    rather than lazily on first iteration. If this were a bare generator
-    function, a caller's try/except around calling it would never catch
-    a JiraFetchError raised inside -- a generator function's body only
-    actually runs once iteration starts, which for an HTTP streaming
-    response may be too late to cleanly return a different status code
-    (e.g. 502) instead of a stream that's already begun.
+    Accept-ticket step: stores the Jira ticket as background context for
+    this ticket's session and does nothing else -- no search, no answer.
+    The staffer's first message (typed, or the UI's "Suggest SOP" button)
+    then runs through the normal stream_message() path with the ticket
+    already in the conversation. Idempotent: a session that already has
+    turns is left alone, so reopening a ticket never duplicates context.
+    Raises jira_client.JiraFetchError if the ticket can't be fetched.
     """
     issue = jira_client.get_issue(issue_key)
-    seed_message = issue.to_seed_message()
     session_id = ticket_session_id(issue_key, session_number)
-    return stream_message(session_id, seed_message, conversation_state, clients,
-                           allowed_groups=allowed_groups, message_source="ticket")
-
-
-def start_or_resume_ticket_session(
-    issue_key: str,
-    conversation_state: ConversationState,
-    clients: PipelineClients,
-    allowed_groups: set[str] | None = None,
-) -> ChatResponse:
-    """
-    Called when an IT staffer opens/accepts a ticket for the first
-    time in this session's lifetime: fetches the ticket's real content
-    (summary, description, comments, status) from Jira and feeds it as
-    the FIRST message of that ticket's session -- the "genuinely new"
-    piece of this integration, per the design decision to avoid
-    building a second, redundant summarization step (the existing
-    Steps 1-9 pipeline already turns a raw message into an understood,
-    answered problem; this function's only job is constructing that
-    raw message from real Jira content instead of requiring the
-    staffer to re-type it).
-
-    Non-streaming variant: fully drains start_or_resume_ticket_session_streaming()
-    and assembles one complete ChatResponse. See stream_message()'s own
-    docstring for why both variants exist rather than one function with a
-    mode flag.
-
-    Idempotent per the caller's session lifecycle: this should only be
-    called ONCE per ticket session (when first opened), not on every
-    subsequent message in that session -- the caller (ui/server.py) is
-    responsible for tracking whether a given ticket session has already
-    been seeded, same as it already tracks live ConversationState
-    objects per session_id.
-    """
-    session_id = ticket_session_id(issue_key)
-    events = list(start_or_resume_ticket_session_streaming(
-        issue_key, conversation_state, clients, allowed_groups=allowed_groups,
-    ))
-    return _assemble_chat_response(session_id, events)
+    session_store.create_session(session_id, conversation_state.case_facts)
+    if not conversation_state.current_turns:
+        # Tagged untrusted: description/comments can come from the end employee.
+        conversation_state.add_turn("user", wrap_untrusted(issue.to_seed_message(), "ticket"))
+        session_store.update_session_facts(session_id, conversation_state.case_facts)
+        session_store.save_conversation_state(session_id, conversation_state.to_dict())
+    return {"session_id": session_id}
 
 
 def send_message(
@@ -181,7 +132,7 @@ def send_message(
 
 
 def _assemble_chat_response(session_id: str, events: list[dict]) -> ChatResponse:
-    """Reduces a fully-drained stream_message()/start_or_resume_ticket_session_streaming()
+    """Reduces a fully-drained stream_message()
     event list into one ChatResponse -- reassembling turn_delta pieces
     back into complete answer_text per turn, for a non-streaming caller."""
     meta = next(e for e in events if e["type"] == "meta")
@@ -246,8 +197,8 @@ def stream_message(
     round-trip -- so there's no separate verification step being lost by
     streaming the first call's own output.
 
-    send_message()/start_or_resume_ticket_session() above are thin
-    non-streaming wrappers that fully drain this generator -- kept as
+    send_message() above is a thin
+    non-streaming wrapper that fully drains this generator -- kept as
     SEPARATE functions from this one (not a single function with a
     streaming/non-streaming flag) so neither caller shape has to reason
     about the other; the logging/redaction/access-denial logic below is
@@ -261,8 +212,7 @@ def stream_message(
 
     message_source: passed straight to run_pipeline() -- see its
     docstring. Defaults to "user_message" for the normal typed-message
-    path; start_or_resume_ticket_session() above overrides it to
-    "ticket" for a ticket's seed content specifically.
+    path.
     """
     session_store.create_session(session_id, conversation_state.case_facts)
 
@@ -349,6 +299,12 @@ def stream_message(
 
     yield {"type": "meta", "session_id": session_id, "stopped_at": "ok", "error_message": None, "message": None}
 
+    # run_pipeline() already appended this message as the last turn, so
+    # [:-1] is the history before it (ticket context + earlier Q&A).
+    conversation_context = "\n".join(
+        f"{t['role']}: {t['text']}" for t in conversation_state.current_turns[:-1]
+    )
+
     assistant_reply_parts = []
     for turn_index, r in enumerate(outcome.results):
         if r.access_denial:
@@ -371,6 +327,7 @@ def stream_message(
                 r.sub_query, r.search_results, r.low_confidence, client=clients.gemini,
                 low_confidence_reason=r.low_confidence_reason, category=r.category_used,
                 confidence_top_score=r.confidence_top_score, confidence_threshold=r.confidence_threshold,
+                staffer_message=raw_message, conversation_context=conversation_context,
             )
         except GeminiUnavailableError as e:
             # Retrieval (the expensive, already-done part) succeeded --

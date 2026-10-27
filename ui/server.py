@@ -57,7 +57,7 @@ from chat_service import (  # noqa: E402
     ChatResponse,
     new_session_id,
     send_message,
-    start_or_resume_ticket_session_streaming,
+    load_ticket_context,
     stream_message,
     ticket_session_id,
 )
@@ -346,10 +346,9 @@ def _sse_event(event: str, data: dict) -> str:
 
 def _forward_as_sse(events):
     """
-    Converts chat_service.py's own event-dict generator (stream_message()/
-    start_or_resume_ticket_session_streaming()) directly into SSE wire
-    format, one-to-one -- used by both post_message_stream() (typed
-    message) and open_ticket_stream() (ticket auto-seed) below.
+    Converts chat_service.py's own event-dict generator (stream_message())
+    directly into SSE wire format, one-to-one -- used by
+    post_message_stream() below.
 
     REAL STREAMING, added 2026-10-24 -- this used to chunk an
     ALREADY-COMPLETE answer into fixed-size pieces purely for visual
@@ -407,7 +406,7 @@ def get_tickets(request: Request):
     tickets = []
     for issue in issues:
         session_id = ticket_session_id(issue.key)
-        has_session = bool(session_store.get_session_turns(session_id))
+        has_session = session_store.session_exists(session_id)
         tickets.append(TicketSummary(
             key=issue.key, summary=issue.summary, status=issue.status,
             session_id=session_id, has_session=has_session,
@@ -436,7 +435,7 @@ def get_ticket_detail(issue_key: str, request: Request):
     Read-only ticket detail (summary/description/comments/status) for the
     ticket-browser's main panel -- the "read it before deciding" step.
     Deliberately does NOT create a session or touch the pipeline; that
-    only happens via POST /api/tickets/{key}/open/stream, the explicit
+    only happens via POST /api/tickets/{key}/context, the explicit
     "Accept" action. Login is still required (same as every other ticket
     endpoint) since ticket content is real work data, not public.
     """
@@ -446,7 +445,7 @@ def get_ticket_detail(issue_key: str, request: Request):
     except jira_client.JiraFetchError as e:
         raise HTTPException(status_code=502, detail=str(e))
     session_id = ticket_session_id(issue_key)
-    has_session = bool(session_store.get_session_turns(session_id))
+    has_session = session_store.session_exists(session_id)
     return TicketDetail(
         key=issue.key, summary=issue.summary, status=issue.status,
         description_text=issue.description_text,
@@ -495,39 +494,24 @@ def get_ticket_sessions(issue_key: str, request: Request):
     return sessions
 
 
-@app.post("/api/tickets/{issue_key}/open/stream")
-def open_ticket_stream(issue_key: str, request: Request, session_number: int = 1):
+@app.post("/api/tickets/{issue_key}/context")
+def open_ticket_context(issue_key: str, request: Request, session_number: int = 1):
     """
-    First-open path ONLY: fetches the real ticket from Jira, seeds a
-    new jira:<KEY>[::N] session with it, and streams that first turn
-    back with REAL token-level streaming -- see _forward_as_sse() and
-    chat_service.stream_message(). Callers should check GET
-    /api/tickets/{key}/session first and use THIS endpoint only when
-    that came back empty; calling it again on an already-seeded ticket
-    session would re-run the pipeline and log a duplicate turn, since
-    start_or_resume_ticket_session_streaming() always seeds -- it does
-    not itself check for an existing session (see its own docstring in
-    chat_service.py: the CALLER owns that idempotency check).
-
-    session_number: added 2026-10-25, see ticket_session_id()'s own
-    docstring for the "start a new session on this ticket" feature.
-    Defaults to 1, matching every pre-existing caller.
+    Accept path: loads the real Jira ticket into this ticket's session as
+    background context ONLY -- no search, no generated answer. The staffer's
+    first message (typed, or the UI's "Suggest SOP" button, which just sends
+    an ordinary message) runs through POST /api/messages/stream with the
+    ticket already in the conversation. Safe to call again on an already-
+    loaded session (see chat_service.load_ticket_context()).
     """
     staff = _require_login(request)
-    session_store.map_session_to_user(ticket_session_id(issue_key, session_number), staff["username"])
-    state = _get_or_restore_conversation_state(ticket_session_id(issue_key, session_number))
+    session_id = ticket_session_id(issue_key, session_number)
+    session_store.map_session_to_user(session_id, staff["username"])
+    state = _get_or_restore_conversation_state(session_id)
     try:
-        # start_or_resume_ticket_session_streaming() fetches the Jira
-        # issue EAGERLY (not lazily on first iteration) specifically so
-        # JiraFetchError can be caught HERE, before any streaming
-        # response starts -- see that function's own docstring.
-        events = start_or_resume_ticket_session_streaming(
-            issue_key, state, _clients, allowed_groups=set(staff["allowed_groups"]),
-            session_number=session_number,
-        )
+        return load_ticket_context(issue_key, state, session_number=session_number)
     except jira_client.JiraFetchError as e:
         raise HTTPException(status_code=502, detail=str(e))
-    return StreamingResponse(_forward_as_sse(events), media_type="text/event-stream")
 
 
 @app.get("/api/sessions")

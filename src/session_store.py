@@ -227,6 +227,13 @@ def create_session(session_id: str, case_facts: dict) -> None:
         )
 
 
+def session_exists(session_id: str) -> bool:
+    with _connect() as conn:
+        return conn.execute(
+            "SELECT 1 FROM sessions WHERE session_id = ?", (session_id,)
+        ).fetchone() is not None
+
+
 def update_session_facts(session_id: str, case_facts: dict) -> None:
     with _connect() as conn:
         conn.execute(

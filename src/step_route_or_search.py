@@ -79,7 +79,9 @@ SEARCH_TOOL = types.FunctionDeclaration(
         "Searches the internal IT knowledge base for a specific technical/IT topic. "
         "Call this ONCE PER DISTINCT ISSUE if the staffer's message bundles two or more "
         "genuinely unrelated problems (e.g. a VPN issue AND a separate email issue) -- "
-        "do not combine unrelated issues into one call."
+        "do not combine unrelated issues into one call. If ONE question spans several "
+        "topics (e.g. comparing two things), call it once per topic so each search stays "
+        "focused, and set same_question=true on each of those calls."
     ),
     parameters={
         "type": "OBJECT",
@@ -87,10 +89,14 @@ SEARCH_TOOL = types.FunctionDeclaration(
             "query": {
                 "type": "STRING",
                 "description": (
-                    "A clean, standalone search query for this ONE issue, grounded in the "
-                    "actual conversation -- carry forward the real topic/system/procedure "
-                    "being discussed, never a generic restatement like 'what is the issue' "
-                    "with no real content."
+                    "A clean, standalone query for the knowledge-base article that would "
+                    "hold the answer, written as a short natural-language question or "
+                    "statement (not a list of keywords), the way that article would be "
+                    "written. For a "
+                    "vague follow-up, carry forward the real topic from the conversation, "
+                    "never a generic restatement like 'what is the issue'. For a policy, "
+                    "definition or general question, search for that topic itself and leave "
+                    "the ticket's specifics out unless the answer depends on them."
                 ),
             },
             "category": {
@@ -114,6 +120,15 @@ SEARCH_TOOL = types.FunctionDeclaration(
                     "up-to-date version of a procedure (words like 'latest', 'current', "
                     "'up to date', 'don't want an outdated version'). A message merely about "
                     "a recent event ('since yesterday') does NOT count."
+                ),
+            },
+            "same_question": {
+                "type": "BOOLEAN",
+                "description": (
+                    "true ONLY when this call is one part of a single question that also "
+                    "needs the other call(s) in this turn to be answered (e.g. the two "
+                    "sides of a comparison), so the results get answered together. false "
+                    "for a standalone call or for separate, unrelated issues."
                 ),
             },
         },
@@ -143,9 +158,15 @@ ticket IS actually about if you know it from the conversation -- do NOT call the
 - If the message is a genuine IT question -- including frustrated, vague, or \
 ambiguous phrasing, and including a vague follow-up like "what's the issue" or "what \
 do you think" that refers back to something already discussed or already answered \
-earlier in this conversation -- call search_knowledge_base. Ground the query in the \
-REAL topic from the conversation, never a generic restatement. If the message bundles \
-two or more genuinely unrelated IT problems, call the tool ONCE PER DISTINCT ISSUE.
+earlier in this conversation -- call search_knowledge_base. Write the query for the \
+knowledge-base article that would hold the answer: for a vague follow-up, carry \
+forward the real topic from the conversation, never a generic restatement; for a \
+policy, definition or general question, search for that topic itself and leave the \
+ticket's specifics out unless the answer depends on them. If the message bundles two \
+or more genuinely unrelated IT problems, call the tool ONCE PER DISTINCT ISSUE. If \
+one question spans several topics (for example comparing two things), call the tool \
+once per topic so each search stays focused, and set same_question=true on those \
+calls so they are answered together.
 
 - If the message asks something you can already answer directly from the conversation \
 itself (e.g. "what's the ticket number", restating a fact already stated earlier), \
@@ -153,7 +174,16 @@ answer directly in plain text using ONLY what's actually in the conversation -- 
 call the tool and do NOT guess at information not present.
 
 Never call the tool for something you already answered in plain text in this same turn, \
-and never answer in plain text AND call the tool in the same turn -- pick exactly one."""
+and never answer in plain text AND call the tool in the same turn -- pick exactly one.
+
+Examples of writing the search (they show the pattern; do not copy the wording):
+- Ticket about a VPN failure. Staffer asks "who has to approve a software install \
+request?" -> ONE call, query "who approves software installation requests" -- a policy \
+question, so the VPN specifics stay out of the query.
+- Ticket about a printer showing offline. Staffer asks "how is that different from a \
+stuck print queue?" -> TWO calls, both with same_question=true: "printer shows \
+offline" and "print queue stuck" -- each search stays on one topic, and the results \
+are answered together."""
 
 
 @dataclass
@@ -166,6 +196,7 @@ class SearchCall:
     error_codes: list[str]
     wants_latest: bool
     validation_warnings: list[str] = field(default_factory=list)
+    same_question: bool = False
 
 
 @dataclass
@@ -245,6 +276,7 @@ def route_or_search(conversation_text: str, new_message: str, client: genai.Clie
                 query=query, category=category, error_codes=error_codes,
                 wants_latest=wants_latest,
                 validation_warnings=_validate_search_call(query, category, error_codes),
+                same_question=bool(args.get("same_question", False)),
             ))
         return RouteResult(search_calls=search_calls)
 
