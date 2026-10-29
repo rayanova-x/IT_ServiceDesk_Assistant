@@ -70,6 +70,7 @@ data -- a turn's citations vs. its answer text -- only exists post-generation).
 Run: python src/eval_retrieval.py
 """
 
+import argparse
 import json
 import math
 import sys
@@ -86,6 +87,7 @@ sys.path.insert(0, str(SRC_DIR))
 
 from retrieval_pipeline import hybrid_search, hybrid_search_reranked  # noqa: E402
 from config import CHROMA_DB_PATH, MODEL_CACHE_DIR, DATA_DIR  # noqa: E402
+import eval_split  # noqa: E402
 
 DATA_RAW = DATA_DIR / "raw"
 DATA_PROCESSED = DATA_DIR / "processed"
@@ -308,6 +310,13 @@ def run_pass(label: str, queries: list[dict], search_fn, out_filename: str):
 
 
 def main():
+    ap = argparse.ArgumentParser(description="Retrieval-only eval over a frozen dev/heldout split.")
+    # Default is dev: tune against dev, run heldout once per finished change.
+    # Non-"all" runs write split-suffixed files so they never overwrite the
+    # "all" outputs the dashboard reads (see eval_split.out_name).
+    eval_split.add_split_argument(ap)
+    args = ap.parse_args()
+
     print("Loading models and Chroma collection...")
     client = chromadb.PersistentClient(path=str(CHROMA_DB_PATH))
     collection = client.get_collection("it_helpdesk_kb")
@@ -326,7 +335,7 @@ def main():
     edge_queries, blocked_queries = load_edge_case_queries()
     error_code_queries = load_error_code_queries()
     slack_thread_queries = load_slack_thread_queries()
-    all_queries = ticket_queries + edge_queries + error_code_queries + slack_thread_queries
+    every_query = ticket_queries + edge_queries + error_code_queries + slack_thread_queries
 
     print(f"Loaded {len(ticket_queries)} ticket-based queries, "
           f"{len(edge_queries)} scorable edge-case queries, "
@@ -334,13 +343,16 @@ def main():
           f"{len(slack_thread_queries)} Slack-thread queries, "
           f"{len(blocked_queries)} blocked (Step 0 not built).")
 
+    all_queries = eval_split.select(every_query, args.split)
+    print(f"Split '{args.split}': running {len(all_queries)} of {len(every_query)} queries.")
+
     baseline_fn = lambda q: hybrid_search(q, collection, model, top_n=5)
     reranked_fn = lambda q: hybrid_search_reranked(q, collection, model, reranker, top_n=5)
 
-    run_pass("BASELINE: hybrid_search (RRF fusion only, no reranker)",
-              all_queries, baseline_fn, "retrieval_eval_results.jsonl")
-    run_pass("RERANKED: hybrid_search_reranked (BAAI/bge-reranker-base)",
-              all_queries, reranked_fn, "retrieval_eval_results_reranked.jsonl")
+    run_pass(f"BASELINE [{args.split}]: hybrid_search (RRF fusion only, no reranker)",
+              all_queries, baseline_fn, eval_split.out_name("retrieval_eval_results.jsonl", args.split))
+    run_pass(f"RERANKED [{args.split}]: hybrid_search_reranked (BAAI/bge-reranker-base)",
+              all_queries, reranked_fn, eval_split.out_name("retrieval_eval_results_reranked.jsonl", args.split))
 
     if blocked_queries:
         print(f"\n=== BLOCKED (need Step 0 conversation contextualization, not yet built) ===")

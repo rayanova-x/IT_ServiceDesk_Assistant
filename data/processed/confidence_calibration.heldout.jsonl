@@ -1,0 +1,33 @@
+{"query_id": "TICKET-Access control list misconfigured", "unanswerable": false, "top_score": -3.6507840156555176, "top_correct": false, "category": "Access & Identity Management"}
+{"query_id": "TICKET-Access denied by certificate policy", "unanswerable": false, "top_score": 4.693955421447754, "top_correct": false, "category": "Access & Identity Management"}
+{"query_id": "TICKET-Access denied by network policy", "unanswerable": false, "top_score": -0.007633723318576813, "top_correct": false, "category": "Access & Identity Management"}
+{"query_id": "TICKET-Access denied by server", "unanswerable": false, "top_score": 4.001053810119629, "top_correct": true, "category": "Access & Identity Management"}
+{"query_id": "TICKET-Access rights revoked", "unanswerable": false, "top_score": -2.598292350769043, "top_correct": true, "category": "Access & Identity Management"}
+{"query_id": "TICKET-Application crash on exit", "unanswerable": false, "top_score": 3.9044270515441895, "top_correct": true, "category": "Software & Applications Support"}
+{"query_id": "TICKET-DHCP failure", "unanswerable": false, "top_score": 3.487720251083374, "top_correct": false, "category": "Network Infrastructure"}
+{"query_id": "TICKET-Duplicate IP detected", "unanswerable": false, "top_score": 0.6305183172225952, "top_correct": false, "category": "Network Infrastructure"}
+{"query_id": "TICKET-License expired", "unanswerable": false, "top_score": 1.2268123626708984, "top_correct": true, "category": "Access & Identity Management"}
+{"query_id": "TICKET-Network IPv6 misconfigured", "unanswerable": false, "top_score": 5.300891876220703, "top_correct": true, "category": "Network Infrastructure"}
+{"query_id": "TICKET-Network SSL VPN failure", "unanswerable": false, "top_score": 4.062512397766113, "top_correct": true, "category": "Network Infrastructure"}
+{"query_id": "TICKET-Network asymmetric routing", "unanswerable": false, "top_score": 3.744283676147461, "top_correct": true, "category": "Network Infrastructure"}
+{"query_id": "TICKET-Phishing website blocked", "unanswerable": false, "top_score": 5.810215473175049, "top_correct": true, "category": "Security Operations"}
+{"query_id": "TICKET-Proxy server misconfiguration", "unanswerable": false, "top_score": 4.343395233154297, "top_correct": false, "category": "Network Infrastructure"}
+{"query_id": "TICKET-Suspicious SaaS login", "unanswerable": false, "top_score": 4.800550937652588, "top_correct": true, "category": "Security Operations"}
+{"query_id": "A06", "unanswerable": false, "top_score": -0.5930018424987793, "top_correct": true, "category": "Network Infrastructure"}
+{"query_id": "A07", "unanswerable": false, "top_score": 1.0355839729309082, "top_correct": false, "category": "Onboarding & Provisioning"}
+{"query_id": "A09", "unanswerable": false, "top_score": 4.062252044677734, "top_correct": false, "category": "Network Infrastructure"}
+{"query_id": "B03", "unanswerable": false, "top_score": 2.890314817428589, "top_correct": false, "category": "Access & Identity Management"}
+{"query_id": "B07", "unanswerable": false, "top_score": 3.266836166381836, "top_correct": true, "category": "Network Infrastructure"}
+{"query_id": "B09", "unanswerable": false, "top_score": 2.652813673019409, "top_correct": false, "category": "Network Infrastructure"}
+{"query_id": "C04", "unanswerable": true, "top_score": 2.448477029800415, "top_correct": false, "category": "Software & Applications Support"}
+{"query_id": "C08", "unanswerable": false, "top_score": -0.6445784568786621, "top_correct": true, "category": "Network Infrastructure"}
+{"query_id": "C10", "unanswerable": false, "top_score": -0.5280770063400269, "top_correct": false, "category": "Network Infrastructure"}
+{"query_id": "D01", "unanswerable": false, "top_score": 5.090798377990723, "top_correct": false, "category": "Software & Applications Support"}
+{"query_id": "D04", "unanswerable": false, "top_score": 3.132931709289551, "top_correct": false, "category": "Network Infrastructure"}
+{"query_id": "D07", "unanswerable": true, "top_score": -1.8683106899261475, "top_correct": false, "category": "Access & Identity Management"}
+{"query_id": "E03", "unanswerable": false, "top_score": -1.8884015083312988, "top_correct": false, "category": "Network Infrastructure"}
+{"query_id": "F02", "unanswerable": false, "top_score": 3.244802236557007, "top_correct": true, "category": "Hardware & Device Support"}
+{"query_id": "F04", "unanswerable": true, "top_score": -4.933349132537842, "top_correct": false, "category": "IT Policies & Procedures"}
+{"query_id": "E07", "unanswerable": true, "top_score": 1.6501715183258057, "top_correct": false, "category": "Software & Applications Support"}
+{"query_id": "E10", "unanswerable": false, "top_score": -1.5658608675003052, "top_correct": false, "category": "Software & Applications Support"}
+{"query_id": "F10", "unanswerable": false, "top_score": 1.7932064533233643, "top_correct": true, "category": "Network Infrastructure"}

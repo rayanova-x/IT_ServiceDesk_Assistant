@@ -1,0 +1,79 @@
+{"query_id": "TICKET-Access denied by BYOD policy", "unanswerable": false, "top_score": 4.959311485290527, "top_correct": true, "category": "Access & Identity Management"}
+{"query_id": "TICKET-Access denied by CIS policy", "unanswerable": false, "top_score": 4.116454124450684, "top_correct": true, "category": "Access & Identity Management"}
+{"query_id": "TICKET-Access denied by compliance policy", "unanswerable": false, "top_score": -0.871703028678894, "top_correct": true, "category": "Access & Identity Management"}
+{"query_id": "TICKET-Application crash on VM boot", "unanswerable": false, "top_score": 6.445893287658691, "top_correct": true, "category": "Software & Applications Support"}
+{"query_id": "TICKET-Application crash on deploy", "unanswerable": false, "top_score": 5.038874626159668, "top_correct": false, "category": "Software & Applications Support"}
+{"query_id": "TICKET-Application crash on uninstall", "unanswerable": false, "top_score": 3.8480775356292725, "top_correct": true, "category": "Software & Applications Support"}
+{"query_id": "TICKET-Application crash on workflow", "unanswerable": false, "top_score": 6.505583763122559, "top_correct": true, "category": "Software & Applications Support"}
+{"query_id": "TICKET-Application deadlock", "unanswerable": false, "top_score": 1.6173136234283447, "top_correct": false, "category": "Software & Applications Support"}
+{"query_id": "TICKET-Bridge mode error", "unanswerable": false, "top_score": 3.9382264614105225, "top_correct": true, "category": "Network Infrastructure"}
+{"query_id": "TICKET-Brute force login attempt", "unanswerable": false, "top_score": -0.7370010018348694, "top_correct": false, "category": "Access & Identity Management"}
+{"query_id": "TICKET-CD/DVD drive not working", "unanswerable": false, "top_score": 4.989614963531494, "top_correct": true, "category": "Hardware & Device Support"}
+{"query_id": "TICKET-Collaboration tool login failure", "unanswerable": false, "top_score": 7.398746490478516, "top_correct": true, "category": "Software & Applications Support"}
+{"query_id": "TICKET-Database connection error", "unanswerable": false, "top_score": 0.4436691701412201, "top_correct": true, "category": "Software & Applications Support"}
+{"query_id": "TICKET-External HDD not mounting", "unanswerable": false, "top_score": 8.594195365905762, "top_correct": false, "category": "Hardware & Device Support"}
+{"query_id": "TICKET-Keyboard malfunction", "unanswerable": false, "top_score": 1.7834067344665527, "top_correct": false, "category": "Hardware & Device Support"}
+{"query_id": "TICKET-Laptop motherboard short circuit", "unanswerable": false, "top_score": 6.109775543212891, "top_correct": true, "category": "Hardware & Device Support"}
+{"query_id": "TICKET-Laptop screen black screen", "unanswerable": false, "top_score": 7.038779258728027, "top_correct": true, "category": "Hardware & Device Support"}
+{"query_id": "TICKET-Laptop screen blue tint", "unanswerable": false, "top_score": 8.417497634887695, "top_correct": false, "category": "Hardware & Device Support"}
+{"query_id": "TICKET-Laptop screen ghost image", "unanswerable": false, "top_score": 6.853808403015137, "top_correct": true, "category": "Hardware & Device Support"}
+{"query_id": "TICKET-Laptop screen purple tint", "unanswerable": false, "top_score": 5.166070938110352, "top_correct": true, "category": "Hardware & Device Support"}
+{"query_id": "TICKET-Laptop touch screen not working", "unanswerable": false, "top_score": 1.6713095903396606, "top_correct": true, "category": "Hardware & Device Support"}
+{"query_id": "TICKET-Laptop won’t power on", "unanswerable": false, "top_score": 3.820323944091797, "top_correct": true, "category": "Hardware & Device Support"}
+{"query_id": "TICKET-Latency spikes", "unanswerable": false, "top_score": 2.189823627471924, "top_correct": true, "category": "Network Infrastructure"}
+{"query_id": "TICKET-Malicious macro detected", "unanswerable": false, "top_score": 3.1544089317321777, "top_correct": true, "category": "Security Operations"}
+{"query_id": "TICKET-Network split horizon error", "unanswerable": false, "top_score": 6.294381618499756, "top_correct": true, "category": "Network Infrastructure"}
+{"query_id": "TICKET-Plugin not loading", "unanswerable": false, "top_score": 5.973414421081543, "top_correct": true, "category": "Software & Applications Support"}
+{"query_id": "TICKET-Session timeout", "unanswerable": false, "top_score": 5.256252288818359, "top_correct": true, "category": "Software & Applications Support"}
+{"query_id": "TICKET-Suspicious HIPAA violation", "unanswerable": false, "top_score": 4.065039157867432, "top_correct": true, "category": "Security Operations"}
+{"query_id": "TICKET-Suspicious ICS alert", "unanswerable": false, "top_score": 3.490445137023926, "top_correct": true, "category": "Security Operations"}
+{"query_id": "TICKET-Suspicious PowerShell script", "unanswerable": false, "top_score": 4.024389743804932, "top_correct": false, "category": "Security Operations"}
+{"query_id": "TICKET-Suspicious contractor compromise", "unanswerable": false, "top_score": 3.9408884048461914, "top_correct": true, "category": "Security Operations"}
+{"query_id": "TICKET-Suspicious cookie theft", "unanswerable": false, "top_score": 4.14967155456543, "top_correct": true, "category": "Security Operations"}
+{"query_id": "TICKET-Suspicious login location", "unanswerable": false, "top_score": 4.756748199462891, "top_correct": false, "category": "Security Operations"}
+{"query_id": "TICKET-Switch port failure", "unanswerable": false, "top_score": 6.552563667297363, "top_correct": true, "category": "Network Infrastructure"}
+{"query_id": "TICKET-Unauthorized login attempt", "unanswerable": false, "top_score": 1.7233819961547852, "top_correct": true, "category": "Access & Identity Management"}
+{"query_id": "A01", "unanswerable": false, "top_score": 0.6726812720298767, "top_correct": true, "category": "Network Infrastructure"}
+{"query_id": "A02", "unanswerable": false, "top_score": 4.125859260559082, "top_correct": true, "category": "Network Infrastructure"}
+{"query_id": "A03", "unanswerable": false, "top_score": 1.5841526985168457, "top_correct": true, "category": "Network Infrastructure"}
+{"query_id": "A04", "unanswerable": false, "top_score": -0.31699448823928833, "top_correct": false, "category": "Network Infrastructure"}
+{"query_id": "A05", "unanswerable": false, "top_score": 8.417840003967285, "top_correct": false, "category": "Network Infrastructure"}
+{"query_id": "A08", "unanswerable": false, "top_score": 1.9062519073486328, "top_correct": false, "category": "Software & Applications Support"}
+{"query_id": "A10", "unanswerable": false, "top_score": 1.9629883766174316, "top_correct": false, "category": "Network Infrastructure"}
+{"query_id": "B01", "unanswerable": false, "top_score": 3.612381935119629, "top_correct": false, "category": "Network Infrastructure"}
+{"query_id": "B02", "unanswerable": true, "top_score": -0.5112982392311096, "top_correct": false, "category": "Hardware & Device Support"}
+{"query_id": "B04", "unanswerable": false, "top_score": 0.42672812938690186, "top_correct": false, "category": "Software & Applications Support"}
+{"query_id": "B05", "unanswerable": false, "top_score": -2.9141011238098145, "top_correct": false, "category": "Software & Applications Support"}
+{"query_id": "B06", "unanswerable": false, "top_score": 0.8946778178215027, "top_correct": false, "category": "Software & Applications Support"}
+{"query_id": "B08", "unanswerable": false, "top_score": 0.5434693098068237, "top_correct": false, "category": "Software & Applications Support"}
+{"query_id": "B10", "unanswerable": false, "top_score": 0.8914062976837158, "top_correct": false, "category": "Software & Applications Support"}
+{"query_id": "C01", "unanswerable": false, "top_score": 4.895359992980957, "top_correct": false, "category": "Network Infrastructure"}
+{"query_id": "C02", "unanswerable": false, "top_score": -0.08901000022888184, "top_correct": false, "category": "Network Infrastructure"}
+{"query_id": "C03", "unanswerable": false, "top_score": 0.12867239117622375, "top_correct": true, "category": "Network Infrastructure"}
+{"query_id": "C05", "unanswerable": false, "top_score": 3.536804676055908, "top_correct": true, "category": "Access & Identity Management"}
+{"query_id": "C06", "unanswerable": false, "top_score": -3.7520041465759277, "top_correct": true, "category": "Access & Identity Management"}
+{"query_id": "C07", "unanswerable": false, "top_score": 4.094898700714111, "top_correct": true, "category": "Hardware & Device Support"}
+{"query_id": "C09", "unanswerable": false, "top_score": 2.846143960952759, "top_correct": true, "category": "Hardware & Device Support"}
+{"query_id": "C11", "unanswerable": false, "top_score": 5.495780944824219, "top_correct": false, "category": "Software & Applications Support"}
+{"query_id": "D02", "unanswerable": false, "top_score": -1.747125267982483, "top_correct": true, "category": "Network Infrastructure"}
+{"query_id": "D03", "unanswerable": false, "top_score": -2.572612762451172, "top_correct": true, "category": "Access & Identity Management"}
+{"query_id": "D05", "unanswerable": true, "top_score": -0.7322047352790833, "top_correct": false, "category": "Network Infrastructure"}
+{"query_id": "D06", "unanswerable": false, "top_score": 1.3985586166381836, "top_correct": true, "category": "Network Infrastructure"}
+{"query_id": "D08", "unanswerable": true, "top_score": -3.0352559089660645, "top_correct": false, "category": "Network Infrastructure"}
+{"query_id": "D09", "unanswerable": false, "top_score": -3.535045623779297, "top_correct": true, "category": "Network Infrastructure"}
+{"query_id": "D10", "unanswerable": true, "top_score": -5.65339994430542, "top_correct": false, "category": "Hardware & Device Support"}
+{"query_id": "E01", "unanswerable": true, "top_score": 5.019944190979004, "top_correct": false, "category": "Software & Applications Support"}
+{"query_id": "E02", "unanswerable": false, "top_score": -3.484384298324585, "top_correct": true, "category": "Network Infrastructure"}
+{"query_id": "E04", "unanswerable": false, "top_score": -1.8833796977996826, "top_correct": false, "category": "Software & Applications Support"}
+{"query_id": "E05", "unanswerable": false, "top_score": 0.7101321220397949, "top_correct": false, "category": "Network Infrastructure"}
+{"query_id": "E06", "unanswerable": true, "top_score": -9.236570358276367, "top_correct": false, "category": "Onboarding & Provisioning"}
+{"query_id": "F01", "unanswerable": false, "top_score": -0.23745262622833252, "top_correct": true, "category": "Network Infrastructure"}
+{"query_id": "F03", "unanswerable": false, "top_score": -0.9768633246421814, "top_correct": true, "category": "Access & Identity Management"}
+{"query_id": "F05", "unanswerable": false, "top_score": -0.5489463210105896, "top_correct": true, "category": "Security Operations"}
+{"query_id": "G01", "unanswerable": false, "top_score": 1.3221776485443115, "top_correct": false, "category": "Software & Applications Support"}
+{"query_id": "E08", "unanswerable": true, "top_score": 2.807119369506836, "top_correct": false, "category": "Security Operations"}
+{"query_id": "E09", "unanswerable": false, "top_score": -3.8022098541259766, "top_correct": true, "category": "Software & Applications Support"}
+{"query_id": "F06", "unanswerable": false, "top_score": 5.335691452026367, "top_correct": false, "category": "Security Operations"}
+{"query_id": "F07", "unanswerable": false, "top_score": 2.387007474899292, "top_correct": true, "category": "Security Operations"}
+{"query_id": "F08", "unanswerable": true, "top_score": -3.899442672729492, "top_correct": false, "category": "Facilities & Regional IT"}
+{"query_id": "F09", "unanswerable": false, "top_score": 7.830138206481934, "top_correct": false, "category": "Hardware & Device Support"}

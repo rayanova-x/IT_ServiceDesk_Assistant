@@ -68,11 +68,14 @@ EITHER Step 4 OR Step 8 says so.
 """
 
 import json
+import logging
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
-from config import DATA_DIR
+from config import DATA_DIR, RERANKER_MODEL_NAME
+
+logger = logging.getLogger("step8_confidence")
 
 PROJECT_ROOT = Path(__file__).parent
 DATA_PROCESSED = DATA_DIR / "processed"
@@ -100,10 +103,46 @@ class ConfidenceCheck:
     threshold_used: float  # the actual cutoff applied -- category-specific or the global fallback
 
 
-def _threshold_for(category: str | None) -> float:
+# A rerank_score is only meaningful on ONE reranker's own scale, so thresholds
+# are keyed by model name: model -> (global default, per-category overrides).
+# Added 2026-10-28: the deployed image runs Xenova/ms-marco-MiniLM-L-6-v2
+# (Dockerfile) while every number above was calibrated on bge-reranker-base.
+# Add a model here ONLY from `calibrate_confidence.py --reranker <name>
+# --split dev` output, never by copying another model's numbers.
+CALIBRATED_RERANKERS: dict[str, tuple[float, dict[str, float]]] = {
+    "BAAI/bge-reranker-base": (CONFIDENCE_THRESHOLD, CATEGORY_THRESHOLDS),
+}
+# Xenova/ms-marco-MiniLM-L-6-v2 is DELIBERATELY absent (2026-10-28, calibrate_confidence.py
+# --reranker ... --split dev, n=71): no cutoff separates its correct top results from
+# wrong ones. Accuracy when "confident" stays 50-56% against a 49% base rate for every
+# cutoff from -3 to 2, and falls to 21-43% above 2.5 (inverted); heldout (n=29) shows no
+# signal either. A threshold here would be fitting noise. Its top-1 was also lower than
+# bge's on the same queries (35/71 vs 45/71 on dev). Do not add an entry unless a new
+# calibration run shows a real accuracy gap that survives on heldout.
+_BASELINE_RERANKER = "BAAI/bge-reranker-base"
+_warned_uncalibrated: set[str] = set()
+
+
+def _threshold_for(category: str | None, reranker: str | None = None) -> float:
+    name = reranker or RERANKER_MODEL_NAME
+    entry = CALIBRATED_RERANKERS.get(name)
+    if entry is None:
+        # KNOWN GAP, not a fix: with no calibration for this model we fall back
+        # to the bge numbers, which are on a different score scale. Confidence
+        # decisions are unreliable until the model is calibrated -- say so loudly.
+        if name not in _warned_uncalibrated:
+            _warned_uncalibrated.add(name)
+            logger.warning(
+                "Reranker %r has no calibrated confidence threshold; using the %r "
+                "numbers (different score scale), so its confident/candidates-only split is "
+                "NOT reliable. Run calibrate_confidence.py --reranker %s --split dev; only add it "
+                "to CALIBRATED_RERANKERS if a cutoff really separates correct from wrong.",
+                name, _BASELINE_RERANKER, name)
+        entry = CALIBRATED_RERANKERS[_BASELINE_RERANKER]
+    default, per_category = entry
     if category is None:
-        return CONFIDENCE_THRESHOLD
-    return CATEGORY_THRESHOLDS.get(category, CONFIDENCE_THRESHOLD)
+        return default
+    return per_category.get(category, default)
 
 
 def check_confidence(search_results: list[dict], category: str | None = None) -> ConfidenceCheck:

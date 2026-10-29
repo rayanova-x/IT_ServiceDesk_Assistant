@@ -20,6 +20,7 @@ a cutoff with no evidence.
 Run: python src/calibrate_confidence.py
 """
 
+import argparse
 import json
 from pathlib import Path
 
@@ -34,7 +35,9 @@ from fastembed import TextEmbedding  # noqa: E402
 from fastembed.rerank.cross_encoder import TextCrossEncoder  # noqa: E402
 
 from retrieval_pipeline import hybrid_search_reranked  # noqa: E402
+from query_parsing import parse_query  # noqa: E402
 from config import CHROMA_DB_PATH, MODEL_CACHE_DIR, DATA_DIR, REPO_ROOT  # noqa: E402
+import eval_split  # noqa: E402
 
 load_dotenv(REPO_ROOT / ".env")
 
@@ -81,23 +84,36 @@ def load_edge_case_queries() -> list[dict]:
 
 
 def main():
+    ap = argparse.ArgumentParser(description="Reranker-score calibration over a frozen dev/heldout split.")
+    # Calibrate on dev ONLY. heldout is for reporting how the chosen threshold
+    # generalizes. Non-"all" runs write a split-suffixed file, so the
+    # confidence_calibration.jsonl the dashboard reads is not overwritten.
+    eval_split.add_split_argument(ap)
+    # Default stays the model the existing 2.0 threshold was calibrated on.
+    # Pass the deployed model (Dockerfile: Xenova/ms-marco-MiniLM-L-6-v2) to
+    # derive ITS threshold -- scores from different rerankers are not on the
+    # same scale, so thresholds are never copied between models.
+    ap.add_argument("--reranker", default="BAAI/bge-reranker-base",
+                    help="fastembed cross-encoder to calibrate (default: %(default)s)")
+    args = ap.parse_args()
+
     print("Loading models and Chroma collection...")
     client = chromadb.PersistentClient(path=str(CHROMA_DB_PATH))
     collection = client.get_collection("it_helpdesk_kb")
     model = TextEmbedding(model_name="BAAI/bge-small-en-v1.5", cache_dir=str(MODEL_CACHE_DIR))
-    # Deliberately hardcoded, NOT config.RERANKER_MODEL_NAME -- the 2.0
-    # confidence threshold in step8_confidence.py was calibrated against
-    # THIS specific model's score distribution. A deployment may run a
-    # lighter reranker for RAM reasons (see config.py), but that threshold
-    # has not been re-derived for it -- this script must keep measuring
-    # against the model the existing threshold actually means.
-    reranker = TextCrossEncoder(model_name="BAAI/bge-reranker-base", cache_dir=str(MODEL_CACHE_DIR))
+    # Explicit --reranker, NOT config.RERANKER_MODEL_NAME -- a calibration run
+    # must say which model's score scale it is measuring. The default is bge
+    # (what the existing 2.0 threshold means); see step8_confidence.py's
+    # CALIBRATED_RERANKERS for where a derived threshold gets recorded.
+    reranker = TextCrossEncoder(model_name=args.reranker, cache_dir=str(MODEL_CACHE_DIR))
+    print(f"Reranker under calibration: {args.reranker}")
 
     subcat_to_page = load_confluence_lookup()
     ticket_queries = build_ticket_queries(subcat_to_page)
     edge_queries = load_edge_case_queries()
-    all_queries = ticket_queries + edge_queries
-    print(f"Running {len(all_queries)} queries ({len(ticket_queries)} ticket, {len(edge_queries)} edge-case)")
+    all_queries = eval_split.select(ticket_queries + edge_queries, args.split)
+    print(f"Split '{args.split}': running {len(all_queries)} queries "
+          f"(of {len(ticket_queries)} ticket + {len(edge_queries)} edge-case)")
 
     records = []
     for i, row in enumerate(all_queries, start=1):
@@ -105,7 +121,13 @@ def main():
         expected_list = expected if isinstance(expected, list) else [expected]
         expected_list = [e for e in expected_list if e is not None]
 
-        results = hybrid_search_reranked(row["query"], collection, model, reranker, top_n=5)
+        # Mirrors serving (pipeline.py): UNFILTERED search, regex-extracted error
+        # codes passed to BM25. It used to omit the error codes, so error-code
+        # queries were calibrated under a different condition than they are served.
+        results = hybrid_search_reranked(
+            row["query"], collection, model, reranker,
+            error_codes=parse_query(row["query"]).error_codes, top_n=5,
+        )
         if not results:
             top_score = None
             top_correct = False
@@ -135,7 +157,11 @@ def main():
         if i % 20 == 0:
             print(f"  {i}/{len(all_queries)} done")
 
-    out_path = DATA_PROCESSED / "confidence_calibration.jsonl"
+    # bge keeps the original filename; any other model gets its own, so two
+    # models' score scales never end up in one file.
+    base_name = ("confidence_calibration.jsonl" if args.reranker == "BAAI/bge-reranker-base"
+                 else f"confidence_calibration_{args.reranker.replace('/', '_')}.jsonl")
+    out_path = DATA_PROCESSED / eval_split.out_name(base_name, args.split)
     with open(out_path, "w", encoding="utf-8") as f:
         for r in records:
             f.write(json.dumps(r, ensure_ascii=False) + "\n")
@@ -154,6 +180,25 @@ def main():
             continue
         correct = sum(1 for r in in_bucket if r["top_correct"])
         print(f"  [{lo:>5}, {hi:>5}): n={len(in_bucket):3d}  correct={correct:3d}  accuracy={correct/len(in_bucket):.1%}")
+
+    # Candidate-cutoff scan (2026-10-28): for a model with no calibrated
+    # threshold yet, show accuracy above/below EVERY plausible cutoff so one can
+    # be chosen from data. Choose on dev; then report the same cutoff on heldout.
+    # "wrong+confident" is the costly error: a wrong top result shown as confident.
+    if scored:
+        lo = int(scored[0]["top_score"] // 0.5) * 0.5
+        hi = scored[-1]["top_score"]
+        print(f"\nCandidate cutoffs for {args.reranker} (answerable queries, n={len(scored)}):")
+        print(f"  {'cutoff':>7} {'confident':>10} {'acc if confident':>17} {'acc if not':>11} {'wrong+confident':>16}")
+        cutoff = lo
+        while cutoff <= hi + 0.5:
+            above = [r for r in scored if r["top_score"] >= cutoff]
+            below = [r for r in scored if r["top_score"] < cutoff]
+            acc_a = f"{sum(r['top_correct'] for r in above)/len(above):.1%}" if above else "n/a"
+            acc_b = f"{sum(r['top_correct'] for r in below)/len(below):.1%}" if below else "n/a"
+            wrong_conf = sum(1 for r in above if not r["top_correct"])
+            print(f"  {cutoff:>7.1f} {len(above):>4}/{len(scored):<4} {acc_a:>17} {acc_b:>11} {wrong_conf:>16d}")
+            cutoff += 0.5
 
     # Per-category breakdown, added 2026-10-15 -- the aggregate curve above
     # was the ONLY calibration view this project had until now, which begs

@@ -80,7 +80,7 @@ class PipelineClients:
 @dataclass
 class PipelineResult:
     sub_query: str  # the specific rewritten (sub-)question this result answers
-    category_used: str | None  # None if the search was unfiltered (ambiguous/unclear)
+    category_used: str | None  # the router's category LABEL (None if ambiguous/unclear); no longer a search filter
     low_confidence: bool
     search_results: list[dict] = field(default_factory=list)
     access_denial: dict | None = None  # Step 4.5 audit -- see retrieval_pipeline.access_denial_info()
@@ -180,10 +180,9 @@ def run_pipeline(raw_message: str, clients: PipelineClients,
     # than a pre-rewritten proxy of it).
     conversation_text = ""
     if conversation_state is not None:
-        if conversation_state.current_turns:
-            conversation_text = "\n".join(
-                f"{t['role']}: {t['text']}" for t in conversation_state.current_turns
-            )
+        # Case-facts block + closed-session summaries + pinned ticket +
+        # running summary + verbatim window (see ConversationState.render_history).
+        conversation_text = conversation_state.render_history()
         conversation_state.add_turn("user", raw_message)
 
     # Steps 0+2+3 REPLACED 2026-10-24 by ONE tool-calling reasoning call
@@ -232,21 +231,29 @@ def run_pipeline(raw_message: str, clients: PipelineClients,
         # step4_ambiguity_gate.py's own 2026-10-24 simplification note).
         gate = apply_ambiguity_gate(call.category)
 
+        # NO category filter (removed 2026-10-28). The router's category used to
+        # be a hard filter on both searches, but eval_category_filter.py showed a
+        # PERFECT router beats unfiltered search by only +1.1 top-1 points on dev
+        # and +2.6 on heldout (one query each, under the 3-point bar fixed in
+        # advance) -- so a real router can only lose by excluding the right
+        # article. The category stays a label: it picks the per-category
+        # confidence threshold, the caveat wording, and the session log.
         search_results = hybrid_search_reranked(
             call.query,
             clients.chroma_collection,
             clients.embedding_model,
             clients.reranker,
             error_codes=call_error_codes,
-            category=gate.search_category,
+            category=None,
             allowed_groups=allowed_groups,
         )
         timer.mark("retrieval_rerank")  # Steps 5/6/6.5, summed across calls if compound
 
         # Step 4.5 audit: only costs anything (one extra local BM25 scan,
-        # no model call) when a real caller identity was supplied.
+        # no model call) when a real caller identity was supplied. Same
+        # (unfiltered) scope as the search above.
         denial = (
-            access_denial_info(call.query, call_error_codes, gate.search_category, allowed_groups)
+            access_denial_info(call.query, call_error_codes, None, allowed_groups)
             if allowed_groups is not None else None
         )
 
@@ -262,23 +269,9 @@ def run_pipeline(raw_message: str, clients: PipelineClients,
         # 4's ambiguity gate (see original comment, still true): a clear
         # category can still get weak search results.
         confidence = check_confidence(search_results, category=gate.search_category)
+        # The router's category as a LABEL (threshold lookup + logging). The old
+        # all-category retry is gone: the search is already unfiltered.
         category_used = gate.search_category
-        if category_used is not None and not confidence.confident:
-            # The category is the router's one-line guess and a hard filter: a
-            # question about a policy or a neighbouring topic can live in
-            # another category. Retry once across all categories and keep it
-            # only if it clears the same confidence bar.
-            wide = apply_recency_rerank(
-                hybrid_search_reranked(
-                    call.query, clients.chroma_collection, clients.embedding_model,
-                    clients.reranker, error_codes=call_error_codes, category=None,
-                    allowed_groups=allowed_groups,
-                ),
-                call.wants_latest,
-            )
-            wide_confidence = check_confidence(wide, category=None)
-            if wide_confidence.confident:
-                search_results, confidence, category_used = wide, wide_confidence, None
         timer.mark("step8_confidence")
         low_confidence = gate.low_confidence or not confidence.confident
         # Which signal actually caused it, for the user-facing message --

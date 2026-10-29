@@ -1,5 +1,59 @@
 # IT Helpdesk RAG Assistant — Project Handoff
 
+> **2026-10-28 CORRECTIONS — read these before the rest of this file.** Parts of
+> Sections 2-4 below describe an architecture that has since changed:
+> 1. **Steps 0, 2 and 3 (contextualize / route / understand) were replaced on
+>    2026-10-24 by ONE tool-calling call**, `src/step_route_or_search.py`
+>    (`route_or_search`). It replies directly (greeting, off-topic, "who are
+>    you", or answerable from the chat) or calls `search_knowledge_base` once per
+>    distinct issue. `step0_context.py` now mainly holds `ConversationState`;
+>    `step2_routing.py` / `step3_understanding.py` are off the live path (Step
+>    3's `CATEGORY_VALUES` and `ERROR_CODE_PATTERN` are still imported).
+> 2. **Conversation memory (added 2026-10-28):** `ConversationState.render_history()`
+>    builds what BOTH the routing call and the generation call see: the case-facts
+>    block (always present), closed-session summaries, the pinned ticket turn, a
+>    running summary, then a verbatim window. `compact_history()` folds old turns
+>    into the running summary once unpinned history passes ~3,000 tokens (keeps
+>    ~1,500 tokens, at least 4 messages). These numbers are untuned starting
+>    values, and the code has NOT yet been run against a real Gemini client.
+> 3. **Prompt fixes (2026-10-28):** the generation prompt's grounding rule is now
+>    unconditional (the old "deviate if 100% sure" clause contradicted "add no
+>    facts found in neither"), and the conversation block in the routing prompt is
+>    fenced as untrusted data.
+> 3b. **The hard category filter was REMOVED (2026-10-28).** `src/eval_category_filter.py`
+>    compared unfiltered search against a perfect-router filter: +1.1 top-1 points on
+>    dev (n=94), +2.6 on heldout (n=39), one query each, under a 3-point bar fixed
+>    before running. Retrieval is now unfiltered; the router's category is only a
+>    label (per-category threshold, caveat text, session log). The all-category
+>    retry in `pipeline.py` was deleted as redundant. Caveat: the experiment's
+>    "wrong category" row is degenerate (a filter excluding the expected page
+>    trivially scores 0%) and says nothing about serving; router category accuracy
+>    under `route_or_search` is unmeasured. Frozen split: `data/processed/eval_split.json`
+>    (`python src/eval_split.py --show`); all eval scripts take `--split dev|heldout|all`.
+> 3c. **Confidence-gate findings (2026-10-28, local, no Gemini; top-1 of the reranked
+>    result on the 100 answerable ticket+edge-case queries):**
+>    - bge-reranker-base: 59/100 correct (dev 45/71, heldout 14/29). At the 2.0
+>      threshold, dev accuracy is 71.8% when "confident" vs 53.1% otherwise, but
+>      heldout is only 52.9% vs 41.7% -- barely above the 48% base rate. The gate is a
+>      WEAK signal overall. The one real separation is Software & Applications
+>      (dev 75.0% at/above vs 18.2% below); every other category is flat. 2.0 and the
+>      Software 3.0 override are left unchanged (heldout too thin to contradict them).
+>    - **The DEPLOYED reranker (MiniLM, `Dockerfile`) is worse and its score is
+>      uncalibratable:** 50/100 top-1 correct (35/71 dev, 15/29 heldout), and no
+>      confidence cutoff separates right from wrong on dev or heldout (see the
+>      comment above `CALIBRATED_RERANKERS` in `step8_confidence.py`). In the deployed
+>      app the "confident vs show-candidates" split is effectively arbitrary. No
+>      MiniLM threshold was added, on purpose. Decision for the owner: deploy bge
+>      (needs ~1.2GB RAM), find a better small reranker and calibrate it, or accept
+>      that the deployed gate carries no information. n is small; treat the 9-point
+>      gap as likely-real but not precise.
+> 4. **Known evaluation weaknesses, being addressed (plan: Phases 2-4):** eval,
+>    calibration and e2e scripts all use the same queries (no held-out set);
+>    Step 3's few-shot examples are verbatim eval queries C01/E01/F01; the
+>    deployed reranker (`Dockerfile`: MiniLM) differs from the one the 2.0
+>    confidence threshold was calibrated on (bge-reranker-base); and the hard
+>    category filter has never been measured against unfiltered search.
+
 **Purpose:** A portfolio project demonstrating a production-realistic agentic
 RAG system for IT helpdesk support — persistent knowledge grounding, hybrid
 retrieval, staleness/confusable-document handling, and query understanding.

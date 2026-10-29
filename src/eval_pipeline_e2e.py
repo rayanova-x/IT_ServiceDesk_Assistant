@@ -39,6 +39,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from pipeline import PipelineClients, run_pipeline  # noqa: E402
 from step9_generation import generate_answer  # noqa: E402
+import eval_split  # noqa: E402
 
 REPO_ROOT = PROJECT_ROOT.parent
 DATA_PROCESSED = REPO_ROOT / "data" / "processed"
@@ -165,8 +166,13 @@ def _load_already_done(out_path: Path) -> set[str]:
 
 
 def main(query_ids: list[str] | None = None, out_filename: str = "eval_pipeline_e2e_results.txt",
-         resume: bool = True):
+         resume: bool = True, split: str = "all"):
     """
+    split: "dev" / "heldout" / "all" -- see eval_split.py. The function
+    default stays "all" so existing programmatic callers are unchanged; the
+    CLI below defaults to "dev". Non-"all" runs write split-suffixed result
+    files, so each split keeps its own resumable progress.
+
     query_ids: if given, only run these specific query_ids (for a fast
     stratified-sample test before committing to the full 62). Each query
     does up to 3 Gemini calls (routing, understanding, generation) against
@@ -184,6 +190,8 @@ def main(query_ids: list[str] | None = None, out_filename: str = "eval_pipeline_
     already passed.
     """
     scorable, blocked = load_eval_queries()
+    scorable = eval_split.select(scorable, split)
+    out_filename = eval_split.out_name(out_filename, split)
     if query_ids:
         scorable = [r for r in scorable if r["query_id"] in query_ids]
 
@@ -295,8 +303,15 @@ STRATIFIED_SAMPLE = [
 ]
 
 if __name__ == "__main__":
-    import sys as _sys
-    if "--sample" in _sys.argv:
-        main(query_ids=STRATIFIED_SAMPLE, out_filename="eval_pipeline_e2e_sample_results.txt")
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--sample", action="store_true", help="fast 13-query stratified smoke run")
+    eval_split.add_split_argument(ap, default=None)
+    args = ap.parse_args()
+    # --sample is a hand-picked smoke test across all splits; keep it that way
+    # unless --split is given explicitly. A full run defaults to dev.
+    split = args.split or ("all" if args.sample else "dev")
+    if args.sample:
+        main(query_ids=STRATIFIED_SAMPLE, out_filename="eval_pipeline_e2e_sample_results.txt", split=split)
     else:
-        main()
+        main(split=split)
