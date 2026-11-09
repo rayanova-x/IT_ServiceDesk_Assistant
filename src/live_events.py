@@ -27,6 +27,7 @@ contents of individual conversations").
 import asyncio
 import json
 import time
+import uuid
 from dataclasses import dataclass, field
 
 _subscribers: list[asyncio.Queue] = []
@@ -67,7 +68,18 @@ class StageTimer:
     {stage: latency_ms} dict for both the structured log line and the
     dashboard's latency breakdown. Not a profiler -- just wall-clock
     deltas between stage boundaries that already exist in the code.
+
+    trace_id: one random id per run_pipeline() call, auto-generated if
+    not supplied. The actual debugging problem this solves isn't latency
+    -- it's that route_or_search()/retrieval/confidence/generation each
+    log independently today, with no shared key to line up "this
+    request's" entries across them. Every stage-boundary log call in
+    pipeline.py now passes extra={"trace_id": timer.trace_id}, so a bad
+    live answer can be grepped by one id across logs/app.log and see
+    every stage's recorded input/output for that exact request, instead
+    of needing to re-run pieces by hand to reconstruct what happened.
     """
+    trace_id: str = field(default_factory=lambda: uuid.uuid4().hex[:12])
     _last: float = field(default_factory=time.perf_counter)
     marks: dict = field(default_factory=dict)
 

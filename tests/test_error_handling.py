@@ -131,7 +131,7 @@ def check_send_message_degrades_pipeline_failure(errors: list) -> None:
 def check_send_message_degrades_generation_failure_only(errors: list) -> None:
     """
     The more important case: retrieval SUCCEEDED (real search_results
-    exist), only generate_answer() fails. The turn must degrade to
+    exist), only generate_draft() fails. The turn must degrade to
     candidates_only WITH those real search results surfaced as
     citations, not be discarded -- that's the actual value of catching
     this at the per-sub-result level instead of the whole-message level.
@@ -152,21 +152,20 @@ def check_send_message_degrades_generation_failure_only(errors: list) -> None:
     fake_outcome = PipelineOutcome(stopped_at="ok", results=[fake_result], stage_latency_ms={"step2_routing": 10.0})
 
     original_run_pipeline = chat_service.run_pipeline
-    original_generate_answer_streaming = chat_service.generate_answer_streaming
+    original_generate_draft = chat_service.generate_draft
 
     class _FakeClients:
-        gemini = object()  # never actually called -- generate_answer_streaming itself is patched below
+        gemini = object()  # never actually called -- generate_draft itself is patched below
 
     def _raise_unavailable(*a, **k):
-        # Matches the REAL failure shape: generate_answer_streaming()
-        # raises BEFORE returning a StreamedAnswer when the initial
-        # call_with_retry-wrapped request is exhausted -- i.e. before any
-        # chunk could have reached a caller. See step9_generation.py's
-        # generate_answer_streaming() docstring.
+        # Matches the REAL failure shape: generate_draft() raises BEFORE
+        # returning anything when the initial call_with_retry-wrapped
+        # request is exhausted. See step9_generation.py's generate_draft()
+        # docstring.
         raise GeminiUnavailableError("step9_generation", Exception("simulated outage"))
 
     chat_service.run_pipeline = lambda *a, **k: fake_outcome
-    chat_service.generate_answer_streaming = _raise_unavailable
+    chat_service.generate_draft = _raise_unavailable
     try:
         resp = chat_service.send_message(
             "test-session-gen-fail", "VPN keeps disconnecting", ConversationState(), clients=_FakeClients(),
@@ -183,7 +182,7 @@ def check_send_message_degrades_generation_failure_only(errors: list) -> None:
             errors.append(f"expected a clear error caveat explaining generation failed, got {turn.caveat!r}")
     finally:
         chat_service.run_pipeline = original_run_pipeline
-        chat_service.generate_answer_streaming = original_generate_answer_streaming
+        chat_service.generate_draft = original_generate_draft
 
 
 def main() -> bool:

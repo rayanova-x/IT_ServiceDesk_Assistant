@@ -618,6 +618,17 @@ def monitoring_summary(since: str | None = None) -> dict:
             f"SELECT COUNT(*) AS n FROM turns {where}{' AND' if where else 'WHERE'} stopped_at = 'declined'",
             params,
         ).fetchone()["n"]
+        # Added 2026-11-09 alongside step_route_or_search.py's new
+        # ask_clarifying_question tool -- a SEPARATE count from
+        # `declined`, specifically so this new branch's real firing rate
+        # is visible on its own, not silently merged into off_topic_rate
+        # (see pipeline.py's "CLARIFY ADDED" note for why that distinction
+        # mattered enough to build this metric alongside the branch
+        # itself, not as an afterthought).
+        clarified = conn.execute(
+            f"SELECT COUNT(*) AS n FROM turns {where}{' AND' if where else 'WHERE'} stopped_at = 'clarify'",
+            params,
+        ).fetchone()["n"]
         errors = conn.execute(
             f"SELECT COUNT(*) AS n FROM turns {where}{' AND' if where else 'WHERE'} stopped_at = 'error'",
             params,
@@ -653,6 +664,7 @@ def monitoring_summary(since: str | None = None) -> dict:
             "knowledge_gap_rate": round(gaps / total, 3),
             "same_topic_pair_rate": round(pairs / total, 3),
             "off_topic_rate": round(declined / total, 3),
+            "clarify_rate": round(clarified / total, 3),
             "error_rate": round(errors / total, 3),
             "access_denial_count": denials,
             "by_category": {r["category_used"]: r["n"] for r in by_category},
@@ -724,6 +736,7 @@ def monitoring_timeseries(bucket: str = "day", limit: int = 30) -> list[dict]:
                 AVG(knowledge_gap_logged) AS knowledge_gap_rate,
                 AVG(same_topic_pair_detected) AS same_topic_pair_rate,
                 AVG(CASE WHEN stopped_at = 'declined' THEN 1.0 ELSE 0.0 END) AS off_topic_rate,
+                AVG(CASE WHEN stopped_at = 'clarify' THEN 1.0 ELSE 0.0 END) AS clarify_rate,
                 AVG(citation_accuracy) AS mean_citation_accuracy
             FROM turns
             GROUP BY day
@@ -741,6 +754,7 @@ def monitoring_timeseries(bucket: str = "day", limit: int = 30) -> list[dict]:
             "knowledge_gap_rate": round(r["knowledge_gap_rate"], 3),
             "same_topic_pair_rate": round(r["same_topic_pair_rate"], 3),
             "off_topic_rate": round(r["off_topic_rate"], 3),
+            "clarify_rate": round(r["clarify_rate"], 3),
             "mean_citation_accuracy": (
                 round(r["mean_citation_accuracy"], 3) if r["mean_citation_accuracy"] is not None else None
             ),

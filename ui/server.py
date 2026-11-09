@@ -350,18 +350,13 @@ def _forward_as_sse(events):
     directly into SSE wire format, one-to-one -- used by
     post_message_stream() below.
 
-    REAL STREAMING, added 2026-10-24 -- this used to chunk an
-    ALREADY-COMPLETE answer into fixed-size pieces purely for visual
-    effect, because generate_answer() ran synthesis to completion before
-    anything could be shown. Now chat_service.py's stream_message()
-    yields turn_delta events AS Gemini actually produces them (see
-    step9_generation.py's generate_answer_streaming() and its own
-    docstring for why this is safe: the verify-then-retract faithfulness
-    check is a single prompt instruction within the one generation call,
-    not a second round-trip, and direct testing confirmed streamed
-    chunks contain only the final, already-verified text -- see
-    PROJECT_HANDOFF.md for the full investigation). This function is now
-    pure wire-format translation, no chunking logic of its own.
+    chat_service.py's stream_message() yields unit_committed events as
+    each answer unit passes step10_verification.py's gate (see that
+    module and step9_generation.py's AnswerUnit docstring for the
+    full design -- replaces the 2026-10-24 raw-token turn_delta
+    streaming, which could no longer be safely paired with a real
+    verification gate). This function is pure wire-format translation,
+    no chunking/verification logic of its own.
     """
     for event in events:
         event_type = event.pop("type")

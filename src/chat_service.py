@@ -23,7 +23,8 @@ from pii_redaction import redact_for_storage
 from prompt_delimiting import wrap_untrusted
 from pipeline import PipelineClients, run_pipeline
 from step0_context import ConversationState, compact_history
-from step9_generation import StreamInterrupted, generate_answer_streaming
+from step9_generation import GenerationResult, generate_draft, render_committed_units, _citations_from
+from step10_verification import verify_draft
 
 logger = logging.getLogger("chat_service")
 
@@ -141,28 +142,62 @@ def send_message(
     return _assemble_chat_response(session_id, events)
 
 
+def _render_units_text(units: list[dict]) -> str:
+    """Same rendering shape as step9_generation.render_committed_units() --
+    duplicated here (not imported) since this only needs the plain-text
+    join, not citation/caveat assembly, which turn_end's own payload
+    already carries. Kept in sync manually; if the numbering/"Warning:"
+    prefix convention changes there, update here too."""
+    diagnosis = next((u for u in units if u["unit_type"] == "diagnosis"), None)
+    steps = [u for u in units if u["unit_type"] == "step"]
+    warnings = [u for u in units if u["unit_type"] == "warning"]
+    lines = []
+    if diagnosis:
+        lines.append(diagnosis["text"])
+    if steps:
+        if lines:
+            lines.append("")
+        lines.extend(f"{i+1}. {s['text']}" for i, s in enumerate(steps))
+    if warnings:
+        if lines:
+            lines.append("")
+        lines.extend(f"Warning: {w['text']}" for w in warnings)
+    return "\n".join(lines).strip()
+
+
 def _assemble_chat_response(session_id: str, events: list[dict]) -> ChatResponse:
     """Reduces a fully-drained stream_message()
-    event list into one ChatResponse -- reassembling turn_delta pieces
-    back into complete answer_text per turn, for a non-streaming caller."""
+    event list into one ChatResponse -- reassembling unit_committed
+    events back into complete answer_text per turn, for a non-streaming
+    caller."""
     meta = next(e for e in events if e["type"] == "meta")
     if meta["stopped_at"] == "error":
         return ChatResponse(stopped_at="error", turns=[], error_message=meta["error_message"])
-    if meta["stopped_at"] == "declined":
-        return ChatResponse(stopped_at="declined", turns=[], message=meta["message"])
+    if meta["stopped_at"] in ("declined", "clarify"):
+        # Same shape (no turns, just a message) for both -- see
+        # pipeline.py's "CLARIFY ADDED" note for why stopped_at is a
+        # distinct value from "declined" even though the response shape
+        # is identical; callers that care about the distinction (e.g. a
+        # future clarify-rate metric) still have it in stopped_at itself.
+        return ChatResponse(stopped_at=meta["stopped_at"], turns=[], message=meta["message"])
 
     turns_by_index: dict[int, dict] = {}
+    units_by_index: dict[int, list] = {}
     for e in events:
         if e["type"] == "turn_start":
-            turns_by_index[e["turn_index"]] = {**e["turn"], "answer_text": ""}
-        elif e["type"] == "turn_delta":
-            turns_by_index[e["turn_index"]]["answer_text"] += e["delta"]
+            turns_by_index[e["turn_index"]] = dict(e["turn"])
+            units_by_index[e["turn_index"]] = []
+        elif e["type"] == "unit_committed":
+            units_by_index[e["turn_index"]].append(e["unit"])
         elif e["type"] == "turn_end" and e.get("turn"):
-            # turn_end carries citations/caveat/staleness for a
-            # synthesized answer, only known once the full text streamed
-            # -- merge over the turn_start payload, same as the frontend
-            # does (see ui/static/index.html's identical merge).
+            # turn_end carries citations/caveat/staleness/mode for a
+            # synthesized answer, only known once every unit's verdict is
+            # in -- merge over the turn_start payload, same as the
+            # frontend does (see ui/static/index.html's identical merge).
             turns_by_index[e["turn_index"]].update(e["turn"])
+
+    for idx, t in turns_by_index.items():
+        t["answer_text"] = _render_units_text(units_by_index.get(idx, [])) or None
 
     turns = [
         ChatTurnDisplay(
@@ -187,25 +222,28 @@ def stream_message(
     message_source: str = "user_message",
 ):
     """
-    Core entry point (generator): runs the real pipeline, streams
-    generation chunks AS THEY'RE PRODUCED by the model, and logs every
-    resulting turn to session_store.py once each one's final text is
-    known. Yields event dicts: {"type": "meta", ...} once up front, then
-    per search result {"type": "turn_start", ...} / repeated
-    {"type": "turn_delta", ...} / {"type": "turn_end", ...}, in that
-    order -- mirrors the SSE event vocabulary ui/server.py already uses,
-    so that layer mostly just forwards these rather than re-deriving them.
+    Core entry point (generator): runs the real pipeline, generates a
+    structured draft, verifies it (step10_verification.py), and commits
+    (and logs to session_store.py) only the units that passed. Yields
+    event dicts: {"type": "meta", ...} once up front, then per search
+    result {"type": "turn_start", ...} / repeated
+    {"type": "unit_committed", ...} (one per verified unit, in order) /
+    {"type": "turn_end", ...} -- mirrors the SSE event vocabulary
+    ui/server.py already uses, so that layer mostly just forwards these
+    rather than re-deriving them.
 
-    REAL STREAMING, added 2026-10-24 -- replaces the old design where
-    ui/server.py faked streaming by slicing an ALREADY-COMPLETE answer
-    into fixed-size chunks purely for visual effect, because the old
-    generate_answer() ran synthesis to completion before anything could
-    be shown. Verified directly before this change (see
-    step9_generation.py's generate_answer_streaming() docstring) that
-    this project's verify-then-retract faithfulness check is a single
-    prompt instruction within one generation call, not a second
-    round-trip -- so there's no separate verification step being lost by
-    streaming the first call's own output.
+    REDESIGNED 2026-11-09 (replaces real-time raw-token streaming, added
+    2026-10-24): token-level streaming showed model output to the
+    browser AS IT WAS PRODUCED, before any verification could run on the
+    complete text -- once a token is on screen, a later "verification
+    failed" can't un-display it. See step9_generation.py's AnswerUnit
+    docstring for the full reasoning. unit_committed replaces the old
+    turn_delta: each unit it carries has ALREADY passed
+    step10_verification.py's gate before this event is ever sent, so
+    what reaches the browser is always already-verified, never raw
+    unverified model output -- the tradeoff is no more token-level
+    streaming WITHIN a unit, but units still commit incrementally as
+    each one is verified, preserving some of the progressive-reveal UX.
 
     send_message() above is a thin
     non-streaming wrapper that fully drains this generator -- kept as
@@ -236,7 +274,7 @@ def stream_message(
     # contextualize() call.
     used_step0 = conversation_state.has_context()
 
-    # Every Gemini call anywhere in run_pipeline()/generate_answer() below
+    # Every Gemini call anywhere in run_pipeline()/generate_draft() below
     # (Steps 0/2/3/9) goes through gemini_retry.call_with_retry() first --
     # a transient 429/503/timeout is retried there. GeminiUnavailableError
     # only reaches here once retries are genuinely exhausted, meaning
@@ -332,7 +370,7 @@ def stream_message(
 
         gen_start = time.perf_counter()
         try:
-            streamed = generate_answer_streaming(
+            draft = generate_draft(
                 r.sub_query, r.search_results, r.low_confidence, client=clients.gemini,
                 low_confidence_reason=r.low_confidence_reason, category=r.category_used,
                 confidence_top_score=r.confidence_top_score, confidence_threshold=r.confidence_threshold,
@@ -340,15 +378,13 @@ def stream_message(
             )
         except GeminiUnavailableError as e:
             # Retrieval (the expensive, already-done part) succeeded --
-            # only the generation call failed BEFORE any chunk was
-            # produced. Degrade just THIS sub-result to a
-            # candidates_only-shaped turn with an error caveat, rather
-            # than discarding a compound query's other, already-
-            # successful sub-results along with it.
+            # only the generation call failed. Degrade just THIS
+            # sub-result to a candidates_only-shaped turn with an error
+            # caveat, rather than discarding a compound query's other,
+            # already-successful sub-results along with it.
             logger.error("stream_message: Gemini unavailable during %s: %s", e.stage, e.original,
                          extra={"session_id": session_id, "username": username, "stage": e.stage})
-            from step9_generation import GenerationResult, _citations_from
-            gen = GenerationResult(
+            draft = GenerationResult(
                 mode="candidates_only",
                 answer_text=None,
                 citations=_citations_from(r.search_results),
@@ -358,96 +394,96 @@ def stream_message(
                     "candidates below instead."
                 ),
             )
-            text_chunks = None
-        else:
-            gen = streamed.result if streamed.mode == "candidates_only" else None  # finalized below if synthesized
-            text_chunks = streamed.text_chunks if streamed.mode == "synthesized" else None
-            source_for_head = streamed.result if streamed.mode == "candidates_only" else None
 
-        # turn_start/turn_end are ALWAYS emitted regardless of which
-        # branch above ran -- real bug found and fixed 2026-10-24: an
-        # earlier version of this only emitted them inside the success
-        # branch, so a generation failure silently produced a turn with
-        # NO turn_start/turn_end at all, and the degraded candidates_only
-        # result never reached the caller (caught by
+        # turn_start is ALWAYS emitted regardless of which branch above
+        # ran -- real bug found and fixed 2026-10-24: an earlier version
+        # of this only emitted it inside the success branch, so a
+        # generation failure silently produced a turn with no
+        # turn_start/turn_end at all (caught by
         # tests/test_error_handling.py's generation-outage check).
-        if gen is not None:
-            # Either candidates_only from the start (low confidence/no
-            # results/generation failure) -- citations/caveat already final.
-            head_citations = [
-                {"page_id": c.page_id, "title": c.title, "header_path": c.header_path,
-                 "last_updated": c.last_updated, "status": c.status}
-                for c in gen.citations
-            ]
-            yield {
-                "type": "turn_start", "turn_index": turn_index,
-                "turn": {
-                    "sub_query": r.sub_query, "mode": gen.mode, "caveat": gen.caveat,
-                    "staleness_disclosure": gen.staleness_disclosure,
-                    "superseded_alternatives": [
-                        {
-                            "current_page_id": a.current_page_id, "older_page_id": a.older_page_id,
-                            "older_title": a.older_title, "older_last_updated": a.older_last_updated,
-                            "current_last_updated": a.current_last_updated,
-                        }
-                        for a in gen.superseded_alternatives
-                    ],
-                    "low_confidence": r.low_confidence, "citations": head_citations,
-                },
-            }
-            yield {"type": "turn_end", "turn_index": turn_index}
+        yield {
+            "type": "turn_start", "turn_index": turn_index,
+            "turn": {
+                "sub_query": r.sub_query, "mode": None, "caveat": None,
+                "staleness_disclosure": "", "superseded_alternatives": [],
+                "low_confidence": r.low_confidence, "citations": [],
+            },
+        }
+
+        if isinstance(draft, GenerationResult):
+            # candidates_only from the start (low confidence/no
+            # results/generation failure) -- nothing to verify, citations/
+            # caveat already final. No units ever generated, so there's
+            # nothing for Step 10 to check -- same as before this redesign.
+            gen = draft
         else:
-            # Synthesized -- stream real chunks, then finalize.
-            yield {
-                "type": "turn_start", "turn_index": turn_index,
-                "turn": {
-                    "sub_query": r.sub_query, "mode": "synthesized", "caveat": None,
-                    "staleness_disclosure": "", "superseded_alternatives": [],
-                    "low_confidence": r.low_confidence, "citations": [],
+            # Step 10: per-unit, independent post-generation verification/
+            # output gate -- a CODE-OWNED check, run BEFORE anything is
+            # sent to the browser, that can drop a unit regardless of
+            # what the generator itself produced. See
+            # step10_verification.py's module docstring: this runs
+            # BEFORE any unit_committed event below, never after, so a
+            # failing unit is never shown at all, not shown-then-retracted.
+            verification = verify_draft(draft, client=clients.gemini)
+            logger.info(
+                "step10_verification decided",
+                extra={
+                    "trace_id": outcome.trace_id, "session_id": session_id,
+                    "sub_query": r.sub_query,
+                    "released_count": len(verification.released_units),
+                    "dropped_count": verification.dropped_count,
+                    "verdicts": [
+                        {"unit_type": v.unit_type, "can_release": v.can_release,
+                         "citation_ids_valid": v.citation_ids_valid,
+                         "invalid_citation_ids": v.invalid_citation_ids,
+                         "groundedness_pass": v.groundedness_pass, "judge_error": v.judge_error}
+                        for v in verification.verdicts
+                    ],
                 },
-            }
-            try:
-                for chunk_text in text_chunks:
-                    yield {"type": "turn_delta", "turn_index": turn_index, "delta": chunk_text}
-            except StreamInterrupted as e:
-                # Some text already reached the browser -- do NOT retry
-                # (see StreamInterrupted's own docstring). Surface a clear
-                # interruption marker instead of silently truncating; the
-                # caller renders this as a visible note, not a crash.
-                logger.error("stream_message: generation stream interrupted: %s", e.original,
-                             extra={"session_id": session_id, "username": username})
+            )
+
+            # Commit units incrementally, IN ORDER (diagnosis, then
+            # steps, then warnings -- verification.released_units
+            # already preserves this order), as each one is confirmed
+            # released -- preserves some of the progressive-reveal UX
+            # streaming used to give, without ever sending a unit that
+            # hasn't already passed verification.
+            for unit in verification.released_units:
                 yield {
-                    "type": "turn_delta", "turn_index": turn_index,
-                    "delta": "\n\n[Response interrupted -- please try again.]",
+                    "type": "unit_committed", "turn_index": turn_index,
+                    "unit": {"unit_type": unit.unit_type, "text": unit.text, "citations": unit.citations},
                 }
-            gen = streamed.finish()
-            # Citations/citation_accuracy/staleness are only known once
-            # the FULL text is in (citation_accuracy_from() checks the
-            # complete answer against what was actually cited) -- sent
-            # here, in turn_end, rather than turn_start, since turn_start
-            # fires before any text has streamed. The frontend merges
-            # this over its earlier (empty-citations) turn_start payload
-            # before rendering the citation chips.
-            yield {
-                "type": "turn_end", "turn_index": turn_index,
-                "turn": {
-                    "caveat": gen.caveat,
-                    "staleness_disclosure": gen.staleness_disclosure,
-                    "superseded_alternatives": [
-                        {
-                            "current_page_id": a.current_page_id, "older_page_id": a.older_page_id,
-                            "older_title": a.older_title, "older_last_updated": a.older_last_updated,
-                            "current_last_updated": a.current_last_updated,
-                        }
-                        for a in gen.superseded_alternatives
-                    ],
-                    "citations": [
-                        {"page_id": c.page_id, "title": c.title, "header_path": c.header_path,
-                         "last_updated": c.last_updated, "status": c.status}
-                        for c in gen.citations
-                    ],
-                },
-            }
+
+            gen = render_committed_units(
+                verification.released_units, draft.search_results, draft.superseded_alternatives,
+                verification.dropped_count,
+            )
+
+        # Citations/citation_accuracy/staleness/caveat are only known
+        # once every unit's verdict is in -- sent here, in turn_end,
+        # rather than turn_start. The frontend merges this over its
+        # earlier turn_start payload before rendering citation chips.
+        yield {
+            "type": "turn_end", "turn_index": turn_index,
+            "turn": {
+                "mode": gen.mode,
+                "caveat": gen.caveat,
+                "staleness_disclosure": gen.staleness_disclosure,
+                "superseded_alternatives": [
+                    {
+                        "current_page_id": a.current_page_id, "older_page_id": a.older_page_id,
+                        "older_title": a.older_title, "older_last_updated": a.older_last_updated,
+                        "current_last_updated": a.current_last_updated,
+                    }
+                    for a in gen.superseded_alternatives
+                ],
+                "citations": [
+                    {"page_id": c.page_id, "title": c.title, "header_path": c.header_path,
+                     "last_updated": c.last_updated, "status": c.status}
+                    for c in gen.citations
+                ],
+            },
+        }
 
         latency_ms = dict(outcome.stage_latency_ms)
         latency_ms["step9_generation"] = round((time.perf_counter() - gen_start) * 1000, 1)

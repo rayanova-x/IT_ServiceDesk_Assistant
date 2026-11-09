@@ -1121,6 +1121,30 @@ function addAssistantTurn(chatId, turn) {
   return row;
 }
 
+// Renders a turn's already-VERIFIED units -- each one arrived as a
+// separate unit_committed SSE event (see chat_service.py's
+// stream_message()), never as raw unverified text. Mirrors
+// step9_generation.render_committed_units()'s plain-text shape
+// (diagnosis, then numbered steps, then "Warning: " lines) so the
+// non-streaming send_message() path and this live path display
+// identically.
+function renderCommittedUnits(textDiv, units) {
+  const diagnosis = units.find(u => u.unit_type === 'diagnosis');
+  const steps = units.filter(u => u.unit_type === 'step');
+  const warnings = units.filter(u => u.unit_type === 'warning');
+  const lines = [];
+  if (diagnosis) lines.push(diagnosis.text);
+  if (steps.length) {
+    if (lines.length) lines.push('');
+    steps.forEach((s, i) => lines.push(`${i + 1}. ${s.text}`));
+  }
+  if (warnings.length) {
+    if (lines.length) lines.push('');
+    warnings.forEach(w => lines.push(`Warning: ${w.text}`));
+  }
+  textDiv.textContent = lines.join('\n');
+}
+
 function addAssistantTurnShell(chatId, turn) {
   clearEmptyState(chatId);
   const row = document.createElement('div');
@@ -1228,11 +1252,13 @@ async function sendMessageInChat(chatId) {
     await readSSE(res, (eventName, data) => {
       if (eventName === 'meta') {
         chat.sessionId = data.session_id;
-        if (data.stopped_at === 'declined') {
-          // Server-generated direct reply (step_route_or_search.py --
-          // one reasoning call decided not to search, e.g. a greeting,
-          // identity question, or off-topic message) -- not hardcoded
-          // here, the message is context-aware.
+        if (data.stopped_at === 'declined' || data.stopped_at === 'clarify') {
+          // Server-generated direct reply OR clarifying question
+          // (step_route_or_search.py -- one reasoning call decided not
+          // to search, e.g. a greeting, identity question, off-topic
+          // message, or a genuinely topic-less message that needs a
+          // clarifying question instead of a guessed search) -- not
+          // hardcoded here, the message is context-aware either way.
           removeThinkingBubble(chatId); removedThinking = true;
           addAssistantTurn(chatId, { answer_text: data.message || "Let me know what you'd like help with on this ticket.", mode: null });
         } else if (data.stopped_at === 'error') {
@@ -1242,24 +1268,29 @@ async function sendMessageInChat(chatId) {
       } else if (eventName === 'turn_start') {
         if (!removedThinking) { removeThinkingBubble(chatId); removedThinking = true; }
         const shell = addAssistantTurnShell(chatId, data.turn);
-        shells[data.turn_index] = { ...shell, turn: data.turn, text: '' };
-      } else if (eventName === 'turn_delta') {
+        shells[data.turn_index] = { ...shell, turn: data.turn, units: [] };
+      } else if (eventName === 'unit_committed') {
+        // Each unit here already PASSED step10_verification.py's gate
+        // before this event was ever sent (see chat_service.py's
+        // stream_message()) -- unlike the old turn_delta, this is never
+        // raw unverified model output. Rendered incrementally as units
+        // arrive (diagnosis first, then steps, then warnings, in commit
+        // order) so the turn still fills in progressively.
         const s = shells[data.turn_index];
         if (!s) return;
-        s.text += data.delta;
-        s.textDiv.textContent = s.text;
+        s.units.push(data.unit);
+        renderCommittedUnits(s.textDiv, s.units);
         scrollChatToBottom(chatId);
       } else if (eventName === 'turn_end') {
         const s = shells[data.turn_index];
         if (!s) return;
-        // data.turn (citations/caveat/staleness/superseded_alternatives)
-        // is only present here for a synthesized answer -- those fields
-        // aren't known until the full text has streamed (see
+        // data.turn (citations/caveat/staleness/superseded_alternatives/
+        // mode) is only known once every unit's verdict is in (see
         // chat_service.py's stream_message()). Merge over the earlier
         // turn_start payload rather than replace it, since turn_start
-        // still carries sub_query/mode/low_confidence.
+        // still carries sub_query/low_confidence.
         const finalTurn = data.turn ? { ...s.turn, ...data.turn } : s.turn;
-        finishAssistantTurn(chatId, s.row, { ...finalTurn, answer_text: s.text });
+        finishAssistantTurn(chatId, s.row, finalTurn);
       }
     });
     loadMonitoring();
@@ -1294,7 +1325,7 @@ async function replayTicketSession(chatId, issueKey, sessionNumber = 1) {
         low_confidence: !!t.low_confidence, superseded_alternatives: [],
         staleness_disclosure: '', citations: t.citations || [],
       });
-    } else if (t.stopped_at === 'declined') {
+    } else if (t.stopped_at === 'declined' || t.stopped_at === 'clarify') {
       addAssistantTurn(chatId, { answer_text: t.answer_text, mode: null });
     }
   });

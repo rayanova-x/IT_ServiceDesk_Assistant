@@ -135,22 +135,33 @@ def chunk_page(page: dict) -> list[dict]:
         if not text:
             continue
 
+        # parent_text is the WHOLE section (pre-split), carried on every
+        # chunk cut from it -- including the n_tokens<=MAX branch, where
+        # chunk text == parent_text (a section that wasn't force-split is
+        # already its own parent). Retrieval (hybrid_search_reranked)
+        # still matches/ranks on the smaller chunk `text` as before; only
+        # generation (step9_generation.py) swaps in parent_text when
+        # building the prompt, so a procedure's prerequisites/warnings
+        # that landed in a sibling half of a force-split section aren't
+        # silently dropped from what the model actually sees.
         n_tokens = token_count(text)
         if n_tokens <= MAX_CHUNK_TOKENS:
             chunks.append(_make_chunk(page, text, header_path, chunk_idx, n_tokens,
-                                       category, label_names, restriction_groups))
+                                       category, label_names, restriction_groups,
+                                       parent_text=text))
             chunk_idx += 1
         else:
             for sub in secondary_splitter.split_text(text):
                 chunks.append(_make_chunk(page, sub, header_path, chunk_idx, token_count(sub),
-                                           category, label_names, restriction_groups, sub_split=True))
+                                           category, label_names, restriction_groups,
+                                           parent_text=text, sub_split=True))
                 chunk_idx += 1
 
     return chunks
 
 
 def _make_chunk(page, text, header_path, chunk_idx, n_tokens,
-                 category, label_names, restriction_groups, sub_split=False):
+                 category, label_names, restriction_groups, parent_text, sub_split=False):
     return {
         "chunk_id": f"{page['id']}-C{chunk_idx:02d}",
         "page_id": page["id"],
@@ -166,6 +177,7 @@ def _make_chunk(page, text, header_path, chunk_idx, n_tokens,
         "secondary_split": sub_split,
         "token_count": n_tokens,
         "text": text,
+        "parent_text": parent_text,  # whole section this chunk was cut from -- see chunk_page()
         "source_type": "confluence",  # see ingest_error_code_spreadsheet.py's docstring --
         # every connector tags its own chunks so origin stays traceable after
         # embed_and_store.py combines chunks from multiple source connectors.
